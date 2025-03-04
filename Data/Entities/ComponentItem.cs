@@ -1,9 +1,7 @@
 ﻿namespace Data.Entities;
 
-public class ComponentItem
+public class ComponentItem : Entity
 {
-    public int Id { get; set; }
-
     public Component Component { get; set; }
     public int ComponentId { get; set; }
 

@@ -1,9 +1,7 @@
 ﻿namespace Data.Entities;
 
-public class ContentComponentAssoc
+public class ContentComponentAssoc : Entity
 {
-    public int Id { get; set; }
-    
     public Content Content { get; set; }
     public int ContentId { get; set; }
 

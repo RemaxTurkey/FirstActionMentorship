@@ -1,8 +1,7 @@
 ﻿namespace Data.Entities;
 
-public class ContentCategory
+public class ContentCategory : Entity
 {
-    public int Id { get; set; }
     public string Title { get; set; }
 
     public ContentCategory Parent { get; set; }

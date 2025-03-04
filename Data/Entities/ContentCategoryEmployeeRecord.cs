@@ -1,9 +1,7 @@
 ﻿namespace Data.Entities;
 
-public class ContentCategoryEmployeeRecord
+public class ContentCategoryEmployeeRecord : Entity
 {
-    public int Id { get; set; }
-    
     public ContentCategoryEmployeeAssoc ContentCategoryEmployeeAssoc { get; set; }
     public int ContentCategoryEmployeeAssocId { get; set; }
 

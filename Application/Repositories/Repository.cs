@@ -25,7 +25,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
     
     public async Task<TEntity> GetByIdAsync(int id, params string[] includes)
     {
-        return await _baseQuery(false, includes).FirstOrDefaultAsync();
+        return await _baseQuery(false, includes).FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<TEntity> AddAsync(TEntity entity)

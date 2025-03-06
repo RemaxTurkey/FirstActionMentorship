@@ -7,9 +7,16 @@ using Application.UnitOfWorks;
 namespace Application.Services.ContentCategory;
 
 public class CreateContentCategory(IServiceProvider serviceProvider)
-    : BaseSvc<ContentCategoryDto, ContentCategoryDto>(serviceProvider)
+    : BaseSvc<CreateContentCategory.Request, CreateContentCategory.Response>(serviceProvider)
 {
-    protected override async Task<ContentCategoryDto> _InvokeAsync(GenericUoW uow, ContentCategoryDto request)
+    public class Request : ContentCategoryDto;
+    
+    public class Response
+    {
+        public ContentCategoryDto Item { get; set; }
+    }
+    
+    protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
     {
         var newContentCategory = new Data.Entities.ContentCategory
         {
@@ -23,7 +30,7 @@ public class CreateContentCategory(IServiceProvider serviceProvider)
         await uow.Repository<Data.Entities.ContentCategory>()
             .AddAsync(newContentCategory);
         await uow.SaveChangesAsync();
-        
-        return newContentCategory.ToDto();
+
+        return new Response { Item = newContentCategory.ToDto() };
     }
 }

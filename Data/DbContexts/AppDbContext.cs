@@ -19,16 +19,16 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // [fam]
-        modelBuilder.Entity<Component>().ToTable("Components", "fam");
-        modelBuilder.Entity<ComponentItem>().ToTable("ComponentItems", "fam");
-        modelBuilder.Entity<ComponentType>().ToTable("ComponentTypes", "fam");
-        modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttributes", "fam");
-        modelBuilder.Entity<ComponentTypeAttributeAssoc>().ToTable("ComponentTypeAttributeAssocs", "fam");
+        modelBuilder.Entity<Component>().ToTable("Component", "fam");
+        modelBuilder.Entity<ComponentItem>().ToTable("ComponentItem", "fam");
+        modelBuilder.Entity<ComponentType>().ToTable("ComponentType", "fam");
+        modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttribute", "fam");
+        modelBuilder.Entity<ComponentTypeAttributeAssoc>().ToTable("ComponentTypeAttributeAssoc", "fam");
         modelBuilder.Entity<Content>().ToTable("Content", "fam");
-        modelBuilder.Entity<ContentCategory>().ToTable("ContentCategories", "fam");
-        modelBuilder.Entity<ContentCategoryEmployeeAssoc>().ToTable("ContentCategoryEmployeeAssocs", "fam");
-        modelBuilder.Entity<ContentCategoryEmployeeRecord>().ToTable("ContentCategoryEmployeeRecords", "fam");
-        modelBuilder.Entity<ContentComponentAssoc>().ToTable("ContentComponentAssocs", "fam");
+        modelBuilder.Entity<ContentCategory>().ToTable("ContentCategory", "fam");
+        modelBuilder.Entity<ContentCategoryEmployeeAssoc>().ToTable("ContentCategoryEmployeeAssoc", "fam");
+        modelBuilder.Entity<ContentCategoryEmployeeRecord>().ToTable("ContentCategoryEmployeeRecord", "fam");
+        modelBuilder.Entity<ContentComponentAssoc>().ToTable("ContentComponentAssoc", "fam");
 
         // [dbo]
         modelBuilder.Entity<Employee>().ToTable("Employee", "dbo");

@@ -7,9 +7,16 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Services.ContentCategory;
 
 public class UpdateContentCategory(IServiceProvider serviceProvider)
-    : BaseSvc<ContentCategoryDto, ContentCategoryDto>(serviceProvider)
+    : BaseSvc<UpdateContentCategory.Request, UpdateContentCategory.Response>(serviceProvider)
 {
-    protected override async Task<ContentCategoryDto> _InvokeAsync(GenericUoW uow, ContentCategoryDto req)
+    public class Request : ContentCategoryDto;
+
+    public class Response
+    {
+        public ContentCategoryDto Item { get; set; }
+    }
+
+    protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         ArgumentNullException.ThrowIfNull(req);
 
@@ -28,6 +35,6 @@ public class UpdateContentCategory(IServiceProvider serviceProvider)
         uow.Repository<Data.Entities.ContentCategory>().Update(contentCategory);
         await uow.SaveChangesAsync();
 
-        return contentCategory.ToDto();
+        return new Response { Item = contentCategory.ToDto() };
     }
 }

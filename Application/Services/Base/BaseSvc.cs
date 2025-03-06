@@ -15,9 +15,9 @@ namespace Application.Services.Base
         {
         }
 
-        public virtual async Task<TResp> InvokeAsync(TReq req)
+        public virtual async Task<TResp> InvokeAsync(TReq request)
         {
-            return await _InvokeAsync(req, NewUnitOfWork());
+            return await _InvokeAsync(request, NewUnitOfWork());
         }
 
         public virtual async Task<TResp> InvokeAsync()
@@ -25,17 +25,17 @@ namespace Application.Services.Base
             return await InvokeAsync(null);
         }
 
-        public virtual async Task<TResp> InvokeNoTrackingAsync(TReq req = null)
+        public virtual async Task<TResp> InvokeNoTrackingAsync(TReq request = null)
         {
-            return await _InvokeAsync(Svc<GenericUoW>(), req);
+            return await _InvokeAsync(Svc<GenericUoW>(), request);
         }
 
 
-        public virtual TResp InvokeNoTracking(TReq req = null)
+        public virtual TResp InvokeNoTracking(TReq request = null)
         {
             try
             {
-                return _InvokeAsync(Svc<GenericUoW>(), req).Result;
+                return _InvokeAsync(Svc<GenericUoW>(), request).Result;
             }
             catch (AggregateException error)
             {

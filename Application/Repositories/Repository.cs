@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Application.Extensions;
+using Application.Models;
 using Data.DbContexts;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +60,47 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
     public IQueryable<TEntity> FindByNoTracking(Expression<Func<TEntity, bool>> expression, params string[] includes)
     {
         return _baseQuery(true, includes).Where(expression);
+    }
+
+    public IQueryable<TEntity> GetAll(params string[] includes)
+    {
+        return _baseQuery(true, includes);
+    }
+
+    public async Task<PagedResult<TEntity>> GetAllPagedAsync(PaginationModel pagination, params string[] includes)
+    {
+        var query = _baseQuery(true, includes);
+        return await GetPagedResultAsync(query, pagination);
+    }
+
+    public async Task<PagedResult<TEntity>> FindNoTrackingByPagedAsync(Expression<Func<TEntity, bool>> expression, PaginationModel pagination, params string[] includes)
+    {
+        var query = _baseQuery(true, includes).Where(expression);
+        return await GetPagedResultAsync(query, pagination);
+    }
+
+    private async Task<PagedResult<TEntity>> GetPagedResultAsync(IQueryable<TEntity> query, PaginationModel pagination)
+    {
+        var totalCount = await query.CountAsync();
+        
+        if (!string.IsNullOrWhiteSpace(pagination.OrderBy))
+        {
+            query = query.ApplyOrder(pagination.OrderBy, pagination.IsAscending);
+        }
+
+        var items = await query
+            .Skip(pagination.Skip)
+            .Take(pagination.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<TEntity>(
+            items, 
+            totalCount, 
+            pagination.PageSize, 
+            pagination.PageNumber,
+            pagination.OrderBy ?? "Id",
+            pagination.IsAscending
+        );
     }
 
     private IQueryable<TEntity> _baseQuery(bool disableTracking, params string[] includesParams)

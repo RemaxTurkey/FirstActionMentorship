@@ -1,4 +1,6 @@
-﻿using Application.Services.Base;
+﻿using Application.Exceptions;
+using Application.Extensions;
+using Application.Services.Base;
 using Application.Services.ContentCategory.DTOs;
 using Application.Services.ContentCategory.Extensions;
 using Application.Services.Employee;
@@ -18,6 +20,8 @@ public class CreateContentCategory(IServiceProvider serviceProvider)
     
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
     {
+        ArgumentException.ThrowIfNullOrEmpty(request.Title);
+
         var newContentCategory = new Data.Entities.ContentCategory
         {
             ParentId = request.ParentId,

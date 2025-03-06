@@ -36,12 +36,15 @@ namespace API.Middlewares
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            
+
             var response = exception switch
             {
-                BusinessException businessException => 
+                BusinessException businessException =>
                     ApiResponse<object>.Error(businessException.Message),
-                
+                ArgumentNullException argumentNullException =>
+                    ApiResponse<object>.Error(argumentNullException.Message),
+                ArgumentException argumentException =>
+                    ApiResponse<object>.Error(argumentException.Message),
                 _ => ApiResponse<object>.Error("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.")
             };
 
@@ -55,4 +58,4 @@ namespace API.Middlewares
             await context.Response.WriteAsync(jsonResponse);
         }
     }
-} 
+}

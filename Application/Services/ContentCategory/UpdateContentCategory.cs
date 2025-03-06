@@ -19,6 +19,7 @@ public class UpdateContentCategory(IServiceProvider serviceProvider)
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         ArgumentNullException.ThrowIfNull(req);
+        ArgumentException.ThrowIfNullOrEmpty(req.Title);
 
         var contentCategory = await uow.Repository<Data.Entities.ContentCategory>()
             .FindBy(x => x.Id == req.Id)

@@ -45,6 +45,7 @@ public class AddComponentItem(IServiceProvider serviceProvider)
         var componentItem = new ComponentItem
         {
             ComponentId = request.ComponentId,
+            ComponentTypeAttributeId = request.Item.AttributeId,
             Value = request.Item.Value,
             IsActive = true
         };

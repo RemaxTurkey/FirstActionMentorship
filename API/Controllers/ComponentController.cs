@@ -16,9 +16,8 @@ public class ComponentController : ApiControllerBase
     /// Yeni bir bileşen oluşturur
     /// </summary>
     /// <remarks>
-    /// Bu endpoint ile belirli bir bileşen tipine dayalı olarak yeni bir bileşen oluşturabilirsiniz.
-    /// Bileşenin sahip olabileceği özellikler, bileşen tipine bağlı olarak değişir.
-    /// Oluşturulan bileşen, içerik sayfalarında kullanılabilir.
+    /// Bu endpoint ile sisteme yeni bir bileşen ekleyebilirsiniz.
+    /// Her bileşen bir ComponentType'a bağlıdır ve o type'ın izin verdiği özelliklere (attributes) sahip olabilir.
     /// 
     /// Örnek istek:
     /// 
@@ -26,22 +25,23 @@ public class ComponentController : ApiControllerBase
     ///     {
     ///        "componentTypeId": 1,
     ///        "isActive": true,
-    ///        "componentItems": [
+    ///        "componentAttributes": [
     ///           {
-    ///              "attributeId": 1,
-    ///              "value": "Ana Sayfa"
+    ///              "componentTypeAttributeId": 1,
+    ///              "value": "Menüye Git"
     ///           },
     ///           {
-    ///              "attributeId": 2,
-    ///              "value": "home_icon"
+    ///              "componentTypeAttributeId": 2,
+    ///              "value": "/menu"
     ///           }
-    ///        ]
+    ///        ],
+    ///        "componentItems": []
     ///     }
     /// </remarks>
     /// <param name="request">Bileşen bilgileri</param>
-    /// <response code="201">Bileşen başarıyla oluşturuldu</response>
+    /// <response code="200">Bileşen başarıyla oluşturuldu</response>
     /// <response code="400">Geçersiz istek</response>
-    /// <response code="404">Bileşen tipi bulunamadı</response>
+    /// <response code="404">ComponentType bulunamadı</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

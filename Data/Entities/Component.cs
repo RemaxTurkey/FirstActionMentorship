@@ -9,4 +9,5 @@ public class Component : Entity
 
     public ICollection<ComponentItem> ComponentItems { get; set; }
     public ICollection<ContentComponentAssoc> ContentComponentAssocs { get; set; }
+    public ICollection<ComponentAttribute> ComponentAttributes { get; set; }
 }

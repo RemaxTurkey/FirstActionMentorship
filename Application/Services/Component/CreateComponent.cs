@@ -45,6 +45,17 @@ public class CreateComponent(IServiceProvider serviceProvider)
             }
         }
         
+        if (request.ComponentAttributes != null && request.ComponentAttributes.Any())
+        {
+            foreach (var attr in request.ComponentAttributes)
+            {
+                if (!validAttributeIds.Contains(attr.ComponentTypeAttributeId))
+                {
+                    throw new BusinessException($"Attribute with ID {attr.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
+                }
+            }
+        }
+        
         var newComponent = new Data.Entities.Component
         {
             ComponentTypeId = request.ComponentTypeId,
@@ -68,8 +79,21 @@ public class CreateComponent(IServiceProvider serviceProvider)
             }
         }
         
+        if (request.ComponentAttributes != null && request.ComponentAttributes.Any())
+        {
+            foreach (var attrDto in request.ComponentAttributes)
+            {
+                await Svc<AddComponentAttribute>().InvokeAsync(uow, new AddComponentAttribute.Request
+                {
+                    ComponentId = newComponent.Id,
+                    ComponentTypeId = request.ComponentTypeId,
+                    Attribute = attrDto
+                });
+            }
+        }
+        
         var createdComponent = await uow.Repository<Data.Entities.Component>()
-            .GetByIdAsync(newComponent.Id, "ComponentItems");
+            .GetByIdAsync(newComponent.Id, "ComponentItems,ComponentAttributes.ComponentTypeAttribute");
         
         return new Response { Item = createdComponent.ToDto() };
     }

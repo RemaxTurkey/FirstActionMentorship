@@ -8,6 +8,7 @@ public class ComponentDto
     public int ComponentTypeId { get; set; }
     public bool IsActive { get; set; }
     public List<ComponentItemDto> ComponentItems { get; set; }
+    public List<ComponentAttributeDto> ComponentAttributes { get; set; }
 }
 
 public class ComponentItemDto

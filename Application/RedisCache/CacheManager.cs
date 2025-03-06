@@ -21,7 +21,7 @@ public class CacheManager : ICacheManager
     }
     
     private static ConnectionMultiplexer LazyConnection => _lazyMultiplexer.Value;
-    private static IDatabase LazyDb => _lazyMultiplexer.Value.GetDatabase();
+    private static IDatabase LazyDb => _lazyMultiplexer.Value.GetDatabase(2);
     
     
     public async Task<T> GetAsync<T>(string key)

@@ -2,9 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Exceptions;
 using Application.Services.Base;
 using Application.Services.ComponentType.DTOs;
 using Application.Services.ComponentType.Extensions;
+using Application.Services.ComponentTypeAttribute;
+using Application.Services.ComponentTypeAttribute.DTOs;
+using Application.Services.ComponentTypeAttributeAssoc;
+using Application.Services.ComponentTypeAttributeAssoc.DTOs;
 using Application.UnitOfWorks;
 
 namespace Application.Services.ComponentType
@@ -15,7 +20,7 @@ namespace Application.Services.ComponentType
         {
         }
 
-        protected async override Task<Response> _InvokeAsync(GenericUoW uow, Request req)
+        protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             ArgumentException.ThrowIfNullOrEmpty(req.Title);
             
@@ -26,6 +31,27 @@ namespace Application.Services.ComponentType
 
             await uow.Repository<Data.Entities.ComponentType>().AddAsync(componentType);
             await uow.SaveChangesAsync();
+
+            // Attrıbuteler varsa ekleyelim
+            if (req.Attributes != null && req.Attributes.Any())
+            {
+                foreach (var attributeDto in req.Attributes)
+                {
+                    // Önce attribute oluştur
+                    var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, new CreateComponentTypeAttribute.Request
+                    {
+                        Name = attributeDto.Name,
+                        Value = attributeDto.Value
+                    });
+                    
+                    // Sonra bu attribute'u ComponentType ile ilişkilendir
+                    await Svc<AssignAttributeToComponentType>().InvokeAsync(uow, new AssignAttributeToComponentType.Request
+                    {
+                        ComponentTypeId = componentType.Id,
+                        ComponentTypeAttributeId = createAttributeResult.Item.Id.Value
+                    });
+                }
+            }
 
             return new Response
             {

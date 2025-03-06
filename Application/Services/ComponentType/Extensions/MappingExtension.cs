@@ -13,7 +13,8 @@ public static class MappingExtension
         return new ComponentTypeDto
         {
             Id = componentType.Id,
-            Title = componentType.Title
+            Title = componentType.Title,
+            Attributes = null // Attributes bu noktada bilinmiyor, ayrıca doldurulacak
         };
     }
 }

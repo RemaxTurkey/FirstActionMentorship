@@ -12,4 +12,6 @@ public class Content : Entity
     public bool IsActive { get; set; }
     public string Header { get; set; }
     public DateTime CreatedDate { get; set; }
+
+    public ICollection<ContentComponentAssoc> ContentComponentAssocs { get; set; }
 }

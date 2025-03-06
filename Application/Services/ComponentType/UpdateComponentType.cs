@@ -2,10 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Exceptions;
 using Application.Services.Base;
+using Application.Services.Component;
 using Application.Services.ComponentType.DTOs;
 using Application.Services.ComponentType.Extensions;
+using Application.Services.ComponentTypeAttribute;
+using Application.Services.ComponentTypeAttribute.DTOs;
+using Application.Services.ComponentTypeAttributeAssoc;
+using Application.Services.ComponentTypeAttributeAssoc.DTOs;
 using Application.UnitOfWorks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.ComponentType
 {
@@ -22,12 +29,12 @@ namespace Application.Services.ComponentType
         {
         }
 
-        protected async override Task<Response> _InvokeAsync(GenericUoW uow, Request req)
+        protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var componentType = await uow.Repository<Data.Entities.ComponentType>().GetByIdAsync(req.Id);
             if (componentType == null)
             {
-                throw new Exception("Component type not found");
+                throw new BusinessException("Component type not found");
             }
 
             componentType.Title = req.Title;
@@ -35,9 +42,54 @@ namespace Application.Services.ComponentType
             uow.Repository<Data.Entities.ComponentType>().Update(componentType);
             await uow.SaveChangesAsync();
 
+            // Yeni attributler eklenecekse
+            if (req.Attributes != null && req.Attributes.Any())
+            {
+                // Mevcut attribute'ları getir
+                var currentAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
+                    new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id });
+                
+                var currentAttributeIds = currentAttributesResponse.Attributes
+                    .Where(a => a.Id.HasValue)
+                    .Select(a => a.Id.Value)
+                    .ToList();
+                
+                foreach (var attributeDto in req.Attributes)
+                {
+                    // Yeni attribute ise ekle ve ilişkilendir
+                    if (!attributeDto.Id.HasValue)
+                    {
+                        // Önce attribute oluştur
+                        var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, 
+                            new CreateComponentTypeAttribute.Request
+                            {
+                                Name = attributeDto.Name,
+                                Value = attributeDto.Value
+                            });
+                        
+                        // Sonra bu attribute'u ComponentType ile ilişkilendir
+                        await Svc<AssignAttributeToComponentType>().InvokeAsync(uow, 
+                            new AssignAttributeToComponentType.Request
+                            {
+                                ComponentTypeId = componentType.Id,
+                                ComponentTypeAttributeId = createAttributeResult.Item.Id.Value
+                            });
+                    }
+                }
+            }
+
+            // Component Type'ı ve attribute'larını tekrar getir
+            var updatedComponentType = componentType.ToDto();
+            
+            // Attributeler ile ilgili bilgileri getir
+            var attributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
+                new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id });
+            
+            updatedComponentType.Attributes = attributesResponse.Attributes;
+
             return new Response
             {
-                Item = componentType.ToDto()
+                Item = updatedComponentType
             };
         }
     }

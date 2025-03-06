@@ -6,4 +6,7 @@ public class Component : Entity
     public int ComponentTypeId { get; set; }
     
     public bool IsActive { get; set; }
+
+    public ICollection<ComponentItem> ComponentItems { get; set; }
+    public ICollection<ContentComponentAssoc> ContentComponentAssocs { get; set; }
 }

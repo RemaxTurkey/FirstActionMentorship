@@ -20,7 +20,7 @@ public class PaginationModel
         set => _pageSize = value > MaxPageSize ? MaxPageSize : value < 1 ? 1 : value;
     }
 
-    public string? OrderBy { get; set; } = "Id";
+    public string OrderBy { get; set; } = "Id";
     public bool IsAscending { get; set; } = true;
 
     [JsonIgnore]

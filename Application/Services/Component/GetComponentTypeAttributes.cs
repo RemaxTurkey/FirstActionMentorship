@@ -32,14 +32,15 @@ public class GetComponentTypeAttributes(IServiceProvider serviceProvider)
         if (componentType == null)
             throw new BusinessException($"ComponentType with ID {request.ComponentTypeId} not found.");
         
-        var attributeAssocs = await uow.Repository<Data.Entities.ComponentTypeAttributeAssoc>()
+        // TODO: bura include ile ComponentTypeAttribute direk alınabilir.
+        var attributeAssoc = await uow.Repository<Data.Entities.ComponentTypeAttributeAssoc>()
             .FindByNoTracking(a => a.ComponentTypeId == request.ComponentTypeId)
             .ToListAsync();
         
-        if (!attributeAssocs.Any())
+        if (!attributeAssoc.Any())
             return new Response { Attributes = new List<ComponentTypeAttributeDto>() };
         
-        var attributeIds = attributeAssocs.Select(a => a.ComponentTypeAttributeId).ToList();
+        var attributeIds = attributeAssoc.Select(a => a.ComponentTypeAttributeId).ToList();
         
         var attributes = await uow.Repository<Data.Entities.ComponentTypeAttribute>()
             .FindByNoTracking(a => attributeIds.Contains(a.Id))

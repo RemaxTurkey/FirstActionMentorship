@@ -8,6 +8,6 @@ public class Component : Entity
     public bool IsActive { get; set; }
 
     public ICollection<ComponentItem> ComponentItems { get; set; }
-    public ICollection<ContentComponentAssoc> ContentComponentAssocs { get; set; }
-    public ICollection<ComponentAttribute> ComponentAttributes { get; set; }
+    public ICollection<ContentComponentAssoc> ContentComponentAssoc { get; set; }
+    public ICollection<ComponentAttributeAssoc> ComponentAttributeAssoc { get; set; }
 }

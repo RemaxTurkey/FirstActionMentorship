@@ -14,7 +14,7 @@ public static class MappingExtension
         {
             Id = componentType.Id,
             Title = componentType.Title,
-            Attributes = null // Attributes bu noktada bilinmiyor, ayrıca doldurulacak
+            Attributes = null
         };
     }
 }

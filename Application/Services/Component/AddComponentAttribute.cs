@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Application.Services.Component;
 
-public class AddComponentAttribute(IServiceProvider serviceProvider)
-    : BaseSvc<AddComponentAttribute.Request, AddComponentAttribute.Response>(serviceProvider)
+public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
+    : BaseSvc<AddComponentTypeAttributeValue.Request, AddComponentTypeAttributeValue.Response>(serviceProvider)
 {
     public class Request
     {
         public int ComponentId { get; set; }
         public int ComponentTypeId { get; set; }
-        public ComponentAttributeDto Attribute { get; set; }
+        public ComponentTypeAttributeValueDto AttributeValue { get; set; }
     }
     
     public class Response
@@ -40,34 +40,34 @@ public class AddComponentAttribute(IServiceProvider serviceProvider)
         
         var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
         
-        if (!validAttributeIds.Contains(request.Attribute.ComponentTypeAttributeId))
+        if (!validAttributeIds.Contains(request.AttributeValue.ComponentTypeAttributeId))
         {
-            throw new BusinessException($"Attribute with ID {request.Attribute.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
+            throw new BusinessException($"Attribute with ID {request.AttributeValue.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
         }
         
         // Aynı attribute daha önce eklenmiş mi kontrol et
-        var existingAttribute = await uow.Repository<Data.Entities.ComponentAttribute>()
+        var existingAttribute = await uow.Repository<Data.Entities.ComponentAttributeAssoc>()
             .GetAsync(a => 
                 a.ComponentId == request.ComponentId && 
-                a.ComponentTypeAttributeId == request.Attribute.ComponentTypeAttributeId);
+                a.ComponentTypeAttributeId == request.AttributeValue.ComponentTypeAttributeId);
         
         if (existingAttribute != null)
         {
             // Varsa güncelle
-            existingAttribute.Value = request.Attribute.Value;
-            uow.Repository<Data.Entities.ComponentAttribute>().Update(existingAttribute);
+            existingAttribute.Value = request.AttributeValue.Value;
+            uow.Repository<Data.Entities.ComponentAttributeAssoc>().Update(existingAttribute);
         }
         else
         {
             // Yoksa ekle
-            var componentAttribute = new Data.Entities.ComponentAttribute
+            var componentAttribute = new Data.Entities.ComponentAttributeAssoc
             {
                 ComponentId = request.ComponentId,
-                ComponentTypeAttributeId = request.Attribute.ComponentTypeAttributeId,
-                Value = request.Attribute.Value
+                ComponentTypeAttributeId = request.AttributeValue.ComponentTypeAttributeId,
+                Value = request.AttributeValue.Value
             };
             
-            await uow.Repository<Data.Entities.ComponentAttribute>().AddAsync(componentAttribute);
+            await uow.Repository<Data.Entities.ComponentAttributeAssoc>().AddAsync(componentAttribute);
         }
         
         await uow.SaveChangesAsync();

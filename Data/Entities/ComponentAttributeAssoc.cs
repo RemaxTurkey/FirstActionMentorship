@@ -1,6 +1,6 @@
 namespace Data.Entities;
 
-public class ComponentAttribute : Entity
+public class ComponentAttributeAssoc : Entity
 {
     public Component Component { get; set; }
     public int ComponentId { get; set; }

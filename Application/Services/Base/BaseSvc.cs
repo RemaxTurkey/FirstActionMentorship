@@ -15,6 +15,8 @@ namespace Application.Services.Base
         {
         }
 
+        protected abstract Task<TResp> _InvokeAsync(GenericUoW uow, TReq req);
+        
         public virtual async Task<TResp> InvokeAsync(TReq request)
         {
             return await _InvokeAsync(request, NewUnitOfWork());
@@ -89,8 +91,6 @@ namespace Application.Services.Base
 
             return resp;
         }
-
-        protected abstract Task<TResp> _InvokeAsync(GenericUoW uow, TReq req);
     }
 }
 

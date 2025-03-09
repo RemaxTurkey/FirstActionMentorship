@@ -1,5 +1,6 @@
 using System.Linq;
 using Application.Services.Component.DTOs;
+using Application.Services.ComponentTypeAttribute.Extensions;
 
 namespace Application.Services.Component.Extensions;
 
@@ -18,23 +19,23 @@ public static partial class MappingExtensions
                     Value = item.Value
                 })
                 .ToList(),
-            ComponentAttributes = component.ComponentAttributes?
-                .Select(attr => new ComponentAttributeDto
+            ComponentTypeAttributeValues = component.ComponentAttributeAssoc?
+                .Select(attr => new ComponentTypeAttributeValueDto
                 {
                     Id = attr.Id,
                     ComponentTypeAttributeId = attr.ComponentTypeAttributeId,
-                    AttributeName = attr.ComponentTypeAttribute?.Name,
+                    ComponentTypeAttributeName = attr.ComponentTypeAttribute?.Name,
                     Value = attr.Value
                 })
                 .ToList()
         };
         
-    public static ComponentAttributeDto ToDto(this Data.Entities.ComponentAttribute attribute) =>
+    public static ComponentTypeAttributeValueDto ToDto(this Data.Entities.ComponentAttributeAssoc attribute) =>
         new()
         {
             Id = attribute.Id,
             ComponentTypeAttributeId = attribute.ComponentTypeAttributeId,
-            AttributeName = attribute.ComponentTypeAttribute?.Name,
+            ComponentTypeAttributeName = attribute.ComponentTypeAttribute?.Name,
             Value = attribute.Value
         };
 } 

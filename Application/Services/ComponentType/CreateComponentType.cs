@@ -40,8 +40,7 @@ namespace Application.Services.ComponentType
                     // Önce attribute oluştur
                     var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, new CreateComponentTypeAttribute.Request
                     {
-                        Name = attributeDto.Name,
-                        Value = attributeDto.Value
+                        Name = attributeDto.Name
                     });
                     
                     // Sonra bu attribute'u ComponentType ile ilişkilendir

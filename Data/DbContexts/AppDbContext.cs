@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     {
         // [fam]
         modelBuilder.Entity<Component>().ToTable("Component", "fam");
+        modelBuilder.Entity<ComponentAttributeAssoc>().ToTable("ComponentAttributeAssoc", "fam");
         modelBuilder.Entity<ComponentItem>().ToTable("ComponentItem", "fam");
         modelBuilder.Entity<ComponentType>().ToTable("ComponentType", "fam");
         modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttribute", "fam");

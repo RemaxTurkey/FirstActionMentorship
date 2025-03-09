@@ -45,9 +45,9 @@ public class CreateComponent(IServiceProvider serviceProvider)
             }
         }
         
-        if (request.ComponentAttributes != null && request.ComponentAttributes.Any())
+        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
         {
-            foreach (var attr in request.ComponentAttributes)
+            foreach (var attr in request.ComponentTypeAttributeValues)
             {
                 if (!validAttributeIds.Contains(attr.ComponentTypeAttributeId))
                 {
@@ -79,21 +79,21 @@ public class CreateComponent(IServiceProvider serviceProvider)
             }
         }
         
-        if (request.ComponentAttributes != null && request.ComponentAttributes.Any())
+        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
         {
-            foreach (var attrDto in request.ComponentAttributes)
+            foreach (var attrDto in request.ComponentTypeAttributeValues)
             {
-                await Svc<AddComponentAttribute>().InvokeAsync(uow, new AddComponentAttribute.Request
+                await Svc<AddComponentTypeAttributeValue>().InvokeAsync(uow, new AddComponentTypeAttributeValue.Request
                 {
                     ComponentId = newComponent.Id,
                     ComponentTypeId = request.ComponentTypeId,
-                    Attribute = attrDto
+                    AttributeValue = attrDto
                 });
             }
         }
         
         var createdComponent = await uow.Repository<Data.Entities.Component>()
-            .GetByIdAsync(newComponent.Id, "ComponentItems,ComponentAttributes.ComponentTypeAttribute");
+            .GetByIdAsync(newComponent.Id);
         
         return new Response { Item = createdComponent.ToDto() };
     }

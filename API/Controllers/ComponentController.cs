@@ -25,7 +25,7 @@ public class ComponentController : ApiControllerBase
     ///     {
     ///        "componentTypeId": 1,
     ///        "isActive": true,
-    ///        "componentAttributes": [
+    ///        "componentTypeAttributeValues": [
     ///           {
     ///              "componentTypeAttributeId": 1,
     ///              "value": "Menüye Git"
@@ -48,7 +48,7 @@ public class ComponentController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComponentDto>> CreateComponent([FromBody] CreateComponent.Request request)
     {
-        var result = await Svc<CreateComponent>().InvokeAsync(request);
+        var result = await Svc<CreateComponent>().InvokeNoTrackingAsync(request);
         return Created($"api/components/{result.Item.Id}", result.Item);
     }
 
@@ -84,7 +84,7 @@ public class ComponentController : ApiControllerBase
         // Request değerini güncelle
         request.ComponentId = componentId;
         
-        var result = await Svc<AddComponentItem>().InvokeAsync(request);
+        var result = await Svc<AddComponentItem>().InvokeNoTrackingAsync(request);
         return Created($"api/components/{componentId}/items", result.Success);
     }
 } 

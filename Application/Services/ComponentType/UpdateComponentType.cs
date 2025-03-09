@@ -31,7 +31,10 @@ namespace Application.Services.ComponentType
 
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
-            var componentType = await uow.Repository<Data.Entities.ComponentType>().GetByIdAsync(req.Id);
+            ArgumentException.ThrowIfNullOrEmpty(req.Title);
+            ArgumentNullException.ThrowIfNull(req.Id);
+            
+            var componentType = await uow.Repository<Data.Entities.ComponentType>().GetByIdAsync(req.Id.Value);
             if (componentType == null)
             {
                 throw new BusinessException("Component type not found");
@@ -47,7 +50,7 @@ namespace Application.Services.ComponentType
             {
                 // Mevcut attribute'ları getir
                 var currentAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-                    new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id });
+                    new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id.Value });
                 
                 var currentAttributeIds = currentAttributesResponse.Attributes
                     .Where(a => a.Id.HasValue)
@@ -63,8 +66,7 @@ namespace Application.Services.ComponentType
                         var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, 
                             new CreateComponentTypeAttribute.Request
                             {
-                                Name = attributeDto.Name,
-                                Value = attributeDto.Value
+                                Name = attributeDto.Name
                             });
                         
                         // Sonra bu attribute'u ComponentType ile ilişkilendir
@@ -83,7 +85,7 @@ namespace Application.Services.ComponentType
             
             // Attributeler ile ilgili bilgileri getir
             var attributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-                new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id });
+                new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id.Value });
             
             updatedComponentType.Attributes = attributesResponse.Attributes;
 

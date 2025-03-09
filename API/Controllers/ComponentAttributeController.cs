@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/componentAttributes")]
+[Route("api/componentTypeAttributeValues")]
 [Produces("application/json")]
-public class ComponentAttributeController : ApiControllerBase
+public class ComponentTypeAttributeValueController : ApiControllerBase
 {
     /// <summary>
-    /// Bir component'a özellik değeri ekler veya günceller
+    /// Bir component'a ComponentType'a ait bir attribute için değer ekler veya günceller
     /// </summary>
     /// <remarks>
     /// Bu endpoint ile bir bileşene, bileşen tipinin izin verdiği özelliklerden birini ekleyebilir veya güncelleyebilirsiniz.
@@ -21,27 +21,27 @@ public class ComponentAttributeController : ApiControllerBase
     /// 
     /// Örnek istek:
     /// 
-    ///     POST /api/componentAttributes
+    ///     POST /api/componentTypeAttributeValues
     ///     {
     ///        "componentId": 1,
     ///        "componentTypeId": 1,
-    ///        "attribute": {
+    ///        "attributeValue": {
     ///           "componentTypeAttributeId": 1,
     ///           "value": "Yeni Değer"
     ///        }
     ///     }
     /// </remarks>
-    /// <param name="request">Özellik bilgileri</param>
-    /// <response code="200">Özellik başarıyla eklendi/güncellendi</response>
+    /// <param name="request">Özellik değeri bilgileri</param>
+    /// <response code="200">Özellik değeri başarıyla eklendi/güncellendi</response>
     /// <response code="400">Geçersiz istek</response>
     /// <response code="404">Component veya ComponentTypeAttribute bulunamadı</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<bool>> AddComponentAttribute([FromBody] AddComponentAttribute.Request request)
+    public async Task<ActionResult<bool>> AddComponentTypeAttributeValue([FromBody] AddComponentTypeAttributeValue.Request request)
     {
-        var result = await Svc<AddComponentAttribute>().InvokeAsync(request);
+        var result = await Svc<AddComponentTypeAttributeValue>().InvokeAsync(request);
         return Ok(result);
     }
 } 

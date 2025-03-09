@@ -8,7 +8,7 @@ namespace Application.Services.ComponentType.DTOs
 {
     public class ComponentTypeDto
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string Title { get; set; }
         public List<ComponentTypeAttributeDto> Attributes { get; set; }
     }

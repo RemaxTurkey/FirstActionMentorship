@@ -9,5 +9,5 @@ public class ContentComponentAssoc : Entity
     public int ComponentId { get; set; }
     
     public int Order { get; set; }
-    public bool IsActive { get; set; }
+    
 }

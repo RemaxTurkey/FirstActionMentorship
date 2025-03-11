@@ -34,28 +34,8 @@ public class CreateComponent(IServiceProvider serviceProvider)
         
         var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
         
-        if (request.ComponentItems != null && request.ComponentItems.Any())
-        {
-            foreach (var item in request.ComponentItems)
-            {
-                if (!validAttributeIds.Contains(item.AttributeId))
-                {
-                    throw new BusinessException($"Attribute with ID {item.AttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-                }
-            }
-        }
-        
-        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
-        {
-            foreach (var attr in request.ComponentTypeAttributeValues)
-            {
-                if (!validAttributeIds.Contains(attr.ComponentTypeAttributeId))
-                {
-                    throw new BusinessException($"Attribute with ID {attr.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-                }
-            }
-        }
-        
+        ValidateComponent(request, validAttributeIds);
+
         var newComponent = new Data.Entities.Component
         {
             ComponentTypeId = request.ComponentTypeId,
@@ -66,20 +46,21 @@ public class CreateComponent(IServiceProvider serviceProvider)
             .AddAsync(newComponent);
         await uow.SaveChangesAsync();
         
-        if (request.ComponentItems != null && request.ComponentItems.Any())
+        if (request.Items != null && request.Items.Any())
         {
-            foreach (var itemDto in request.ComponentItems)
+            foreach (var itemDto in request.Items)
             {
                 await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
                 {
                     ComponentId = newComponent.Id,
                     ComponentTypeId = request.ComponentTypeId,
-                    Item = itemDto
+                    Item = itemDto,
+                    IsActive = request.IsActive
                 });
             }
         }
         
-        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
+        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Count != 0)
         {
             foreach (var attrDto in request.ComponentTypeAttributeValues)
             {
@@ -87,7 +68,8 @@ public class CreateComponent(IServiceProvider serviceProvider)
                 {
                     ComponentId = newComponent.Id,
                     ComponentTypeId = request.ComponentTypeId,
-                    AttributeValue = attrDto
+                    AttributeValue = attrDto,
+                    IsActive = request.IsActive
                 });
             }
         }
@@ -96,5 +78,30 @@ public class CreateComponent(IServiceProvider serviceProvider)
             .GetByIdAsync(newComponent.Id);
         
         return new Response { Item = createdComponent.ToDto() };
+    }
+
+    private static void ValidateComponent(Request request, List<int> validAttributeIds)
+    {
+        if (request.Items != null && request.Items.Any())
+        {
+            foreach (var item in request.Items)
+            {
+                if (!validAttributeIds.Contains(item.AttributeId))
+                {
+                    throw new BusinessException($"Attribute with ID {item.AttributeId} is not associated with ComponentType {request.ComponentTypeId}");
+                }
+            }
+        }
+
+        if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
+        {
+            foreach (var attr in request.ComponentTypeAttributeValues)
+            {
+                if (!validAttributeIds.Contains(attr.ComponentTypeAttributeId))
+                {
+                    throw new BusinessException($"Attribute with ID {attr.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
+                }
+            }
+        }
     }
 }

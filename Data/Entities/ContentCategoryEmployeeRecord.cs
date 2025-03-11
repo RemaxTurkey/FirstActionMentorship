@@ -8,7 +8,8 @@ public class ContentCategoryEmployeeRecord : Entity
     public Content Content { get; set; }
     public int ContentId { get; set; }
 
-    public bool IsActive { get; set; }
+    
     public bool IsCompleted { get; set; }
-    public DateTime CompleteDate { get; set; }
+    public DateTime? CompletionDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

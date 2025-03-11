@@ -8,6 +8,5 @@ public class ContentCategory : Entity
     public int? ParentId { get; set; }
 
     public int Order { get; set; }
-    public bool? IsActive { get; set; }
     public string Icon { get; set; }
 }

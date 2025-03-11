@@ -18,7 +18,10 @@ namespace Application.Services.ComponentType
 {
     public class UpdateComponentType : BaseSvc<UpdateComponentType.Request, UpdateComponentType.Response>
     {
-        public class Request : ComponentTypeDto;
+        public class Request : ComponentTypeDto
+        {
+            public bool IsActive { get; set; } = true;
+        }
 
         public class Response
         {
@@ -48,15 +51,6 @@ namespace Application.Services.ComponentType
             // Yeni attributler eklenecekse
             if (req.Attributes != null && req.Attributes.Any())
             {
-                // Mevcut attribute'ları getir
-                var currentAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-                    new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id.Value });
-                
-                var currentAttributeIds = currentAttributesResponse.Attributes
-                    .Where(a => a.Id.HasValue)
-                    .Select(a => a.Id.Value)
-                    .ToList();
-                
                 foreach (var attributeDto in req.Attributes)
                 {
                     // Yeni attribute ise ekle ve ilişkilendir
@@ -66,7 +60,8 @@ namespace Application.Services.ComponentType
                         var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, 
                             new CreateComponentTypeAttribute.Request
                             {
-                                Name = attributeDto.Name
+                                Name = attributeDto.Name,
+                                IsActive = req.IsActive
                             });
                         
                         // Sonra bu attribute'u ComponentType ile ilişkilendir
@@ -74,7 +69,8 @@ namespace Application.Services.ComponentType
                             new AssignAttributeToComponentType.Request
                             {
                                 ComponentTypeId = componentType.Id,
-                                ComponentTypeAttributeId = createAttributeResult.Item.Id.Value
+                                ComponentTypeAttributeId = createAttributeResult.Item.Id!.Value,
+                                IsActive = req.IsActive
                             });
                     }
                 }

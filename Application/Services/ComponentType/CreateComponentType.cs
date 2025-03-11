@@ -26,7 +26,9 @@ namespace Application.Services.ComponentType
             
             var componentType = new Data.Entities.ComponentType
             {
-                Title = req.Title
+                Title = req.Title,
+                Description = req.Description,
+                IsActive = req.IsActive
             };
 
             await uow.Repository<Data.Entities.ComponentType>().AddAsync(componentType);
@@ -37,17 +39,19 @@ namespace Application.Services.ComponentType
             {
                 foreach (var attributeDto in req.Attributes)
                 {
-                    // Önce attribute oluştur
-                    var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, new CreateComponentTypeAttribute.Request
-                    {
-                        Name = attributeDto.Name
-                    });
-                    
+                    var componentTypeAttributeId = attributeDto.Id ?? (await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow,
+                        new CreateComponentTypeAttribute.Request
+                        {
+                            Name = attributeDto.Name,
+                            IsActive = req.IsActive
+                        })).Item.Id!.Value;
+
                     // Sonra bu attribute'u ComponentType ile ilişkilendir
                     await Svc<AssignAttributeToComponentType>().InvokeAsync(uow, new AssignAttributeToComponentType.Request
                     {
                         ComponentTypeId = componentType.Id,
-                        ComponentTypeAttributeId = createAttributeResult.Item.Id.Value
+                        ComponentTypeAttributeId = componentTypeAttributeId,
+                        IsActive = req.IsActive
                     });
                 }
             }
@@ -58,7 +62,10 @@ namespace Application.Services.ComponentType
             };
         }
 
-        public class Request : ComponentTypeDto;
+        public class Request : ComponentTypeDto
+        {
+            public bool IsActive { get; set; } = true;
+        }
 
         public class Response
         {

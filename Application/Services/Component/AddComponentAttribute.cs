@@ -15,6 +15,7 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         public int ComponentId { get; set; }
         public int ComponentTypeId { get; set; }
         public ComponentTypeAttributeValueDto AttributeValue { get; set; }
+        public bool IsActive { get; set; } = true;
     }
     
     public class Response
@@ -46,7 +47,7 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         }
         
         // Aynı attribute daha önce eklenmiş mi kontrol et
-        var existingAttribute = await uow.Repository<Data.Entities.ComponentAttributeAssoc>()
+        var existingAttribute = await uow.Repository<Data.Entities.ComponentAttributeValue>()
             .GetAsync(a => 
                 a.ComponentId == request.ComponentId && 
                 a.ComponentTypeAttributeId == request.AttributeValue.ComponentTypeAttributeId);
@@ -55,19 +56,21 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         {
             // Varsa güncelle
             existingAttribute.Value = request.AttributeValue.Value;
-            uow.Repository<Data.Entities.ComponentAttributeAssoc>().Update(existingAttribute);
+            existingAttribute.IsActive = request.IsActive;
+            uow.Repository<Data.Entities.ComponentAttributeValue>().Update(existingAttribute);
         }
         else
         {
             // Yoksa ekle
-            var componentAttribute = new Data.Entities.ComponentAttributeAssoc
+            var componentAttribute = new Data.Entities.ComponentAttributeValue
             {
                 ComponentId = request.ComponentId,
                 ComponentTypeAttributeId = request.AttributeValue.ComponentTypeAttributeId,
-                Value = request.AttributeValue.Value
+                Value = request.AttributeValue.Value,
+                IsActive = request.IsActive
             };
             
-            await uow.Repository<Data.Entities.ComponentAttributeAssoc>().AddAsync(componentAttribute);
+            await uow.Repository<Data.Entities.ComponentAttributeValue>().AddAsync(componentAttribute);
         }
         
         await uow.SaveChangesAsync();

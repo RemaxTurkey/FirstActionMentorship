@@ -42,7 +42,8 @@ public class AssignAttributeToComponentType(IServiceProvider serviceProvider)
         var newAssoc = new Data.Entities.ComponentTypeAttributeAssoc
         {
             ComponentTypeId = request.ComponentTypeId,
-            ComponentTypeAttributeId = request.ComponentTypeAttributeId
+            ComponentTypeAttributeId = request.ComponentTypeAttributeId,
+            IsActive = request.IsActive
         };
         
         await uow.Repository<Data.Entities.ComponentTypeAttributeAssoc>()

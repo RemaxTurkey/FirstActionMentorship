@@ -27,15 +27,15 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
             Title = req.Title,
             ContentCategoryId = req.ContentCategoryId,
         };
-
+        
         await uow.Repository<ContentComponentAssoc>()
             .AddRangeAsync(req.Components!.Select(x =>
                 new ContentComponentAssoc()
                 {
                     ComponentId = x.Id!.Value,
                     IsActive = x.IsActive,
-                    ContentId = content.Id,
-                    Order = x.Order,
+                    Content = content,
+                    Order = x.Order!.Value
                 }).ToList());
 
         await uow.SaveChangesAsync();
@@ -43,14 +43,17 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
         return new();
     }
 
-    private void ValidateComponents(CreateContent.Request request)
+    private void ValidateComponents(Request request)
     {
         if (request.Components is null)
         {
-            throw new BusinessException("");
+            throw new BusinessException("Components are required");
         }
 
-        throw new BusinessException("");
+        if (request.Components.Any(x => x.Order is null))
+        {
+            throw new BusinessException("Order is required");
+        }
     }
 
     public class Request : ContentDto;

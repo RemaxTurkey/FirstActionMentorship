@@ -9,5 +9,5 @@ public class ComponentItem : Entity
     public int ComponentTypeAttributeId { get; set; }
 
     public string Value { get; set; }
-    public bool IsActive { get; set; }
+    
 }

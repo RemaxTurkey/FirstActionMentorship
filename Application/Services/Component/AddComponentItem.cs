@@ -17,6 +17,7 @@ public class AddComponentItem(IServiceProvider serviceProvider)
         public int ComponentId { get; set; }
         public int ComponentTypeId { get; set; }
         public ComponentItemDto Item { get; set; }
+        public bool IsActive { get; set; } = true;
     }
     
     public class Response
@@ -47,7 +48,7 @@ public class AddComponentItem(IServiceProvider serviceProvider)
             ComponentId = request.ComponentId,
             ComponentTypeAttributeId = request.Item.AttributeId,
             Value = request.Item.Value,
-            IsActive = true
+            IsActive = request.IsActive
         };
         
         await uow.Repository<ComponentItem>()

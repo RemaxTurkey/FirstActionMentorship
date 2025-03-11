@@ -18,9 +18,26 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Global query filter - tüm entity'ler için IsActive = true olanları filtrele
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(Entity).IsAssignableFrom(entityType.ClrType))
+            {
+                // Global query filter uygula
+                var method = typeof(AppDbContext).GetMethod(nameof(SetGlobalQueryForEntity), 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .MakeGenericMethod(entityType.ClrType);
+                
+                method.Invoke(this, new object[] { modelBuilder });
+                
+                // IsActive alanı için index ekle
+                modelBuilder.Entity(entityType.ClrType).HasIndex("IsActive");
+            }
+        }
+
         // [fam]
         modelBuilder.Entity<Component>().ToTable("Component", "fam");
-        modelBuilder.Entity<ComponentAttributeAssoc>().ToTable("ComponentAttributeAssoc", "fam");
+        modelBuilder.Entity<ComponentAttributeValue>().ToTable("ComponentAttributeValue", "fam");
         modelBuilder.Entity<ComponentItem>().ToTable("ComponentItem", "fam");
         modelBuilder.Entity<ComponentType>().ToTable("ComponentType", "fam");
         modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttribute", "fam");
@@ -35,6 +52,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Employee>().ToTable("Employee", "dbo");
 
         base.OnModelCreating(modelBuilder);
+    }
+    
+    private void SetGlobalQueryForEntity<TEntity>(ModelBuilder modelBuilder) where TEntity : Entity
+    {
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => e.IsActive);
     }
 
     #region fam

@@ -10,6 +10,9 @@
       <ProjectReference Include="..\Data\Data.csproj" />
       <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.2" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.2" />
     </ItemGroup>
 
 </Project>

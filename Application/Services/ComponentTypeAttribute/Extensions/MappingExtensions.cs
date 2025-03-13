@@ -8,6 +8,7 @@ public static partial class MappingExtensions
         new()
         {
             Id = attribute.Id,
-            Name = attribute.Name
+            Name = attribute.Name, 
+            DataType = attribute.DataType 
         };
 } 

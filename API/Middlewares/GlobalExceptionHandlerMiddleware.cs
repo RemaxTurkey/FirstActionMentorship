@@ -45,7 +45,8 @@ namespace API.Middlewares
                     ApiResponse<object>.Error(argumentNullException.Message),
                 ArgumentException argumentException =>
                     ApiResponse<object>.Error(argumentException.Message),
-                _ => ApiResponse<object>.Error("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.")
+                //_ => ApiResponse<object>.Error("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.")
+                _ => ApiResponse<object>.Error(exception.Message)
             };
 
             context.Response.StatusCode = exception switch

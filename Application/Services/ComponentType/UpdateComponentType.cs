@@ -48,15 +48,12 @@ namespace Application.Services.ComponentType
             uow.Repository<Data.Entities.ComponentType>().Update(componentType);
             await uow.SaveChangesAsync();
 
-            // Yeni attributler eklenecekse
             if (req.Attributes != null && req.Attributes.Any())
             {
                 foreach (var attributeDto in req.Attributes)
                 {
-                    // Yeni attribute ise ekle ve ilişkilendir
                     if (!attributeDto.Id.HasValue)
                     {
-                        // Önce attribute oluştur
                         var createAttributeResult = await Svc<CreateComponentTypeAttribute>().InvokeAsync(uow, 
                             new CreateComponentTypeAttribute.Request
                             {
@@ -64,7 +61,6 @@ namespace Application.Services.ComponentType
                                 IsActive = req.IsActive
                             });
                         
-                        // Sonra bu attribute'u ComponentType ile ilişkilendir
                         await Svc<AssignAttributeToComponentType>().InvokeAsync(uow, 
                             new AssignAttributeToComponentType.Request
                             {
@@ -76,12 +72,10 @@ namespace Application.Services.ComponentType
                 }
             }
 
-            // Component Type'ı ve attribute'larını tekrar getir
             var updatedComponentType = componentType.ToDto();
             
-            // Attributeler ile ilgili bilgileri getir
             var attributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-                new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id.Value });
+                new GetComponentTypeAttributes.Request(req.Id.Value));
             
             updatedComponentType.Attributes = attributesResponse.Attributes;
 

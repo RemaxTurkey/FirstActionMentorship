@@ -35,7 +35,8 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
                     ComponentId = x.Id!.Value,
                     IsActive = x.IsActive,
                     Content = content,
-                    Order = x.Order!.Value
+                    Order = x.Order!.Value,
+                    ContentCategoryId = x.ContentCategoryId
                 }).ToList());
 
         await uow.SaveChangesAsync();

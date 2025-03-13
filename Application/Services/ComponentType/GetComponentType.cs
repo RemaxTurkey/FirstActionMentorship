@@ -28,14 +28,11 @@ public class GetComponentType(IServiceProvider serviceProvider)
         if (componentType == null)
             throw new BusinessException("Component type not found");
         
-        // ComponentType'ın DTO'sunu oluştur
         var componentTypeDto = componentType.ToDto();
         
-        // Attribute'ları getir
         var attributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-            new GetComponentTypeAttributes.Request { ComponentTypeId = req.Id });
+            new GetComponentTypeAttributes.Request(req.Id));
         
-        // Attribute'ları DTO'ya ekle
         componentTypeDto.Attributes = attributesResponse.Attributes;
             
         return new Response(Data: componentTypeDto);

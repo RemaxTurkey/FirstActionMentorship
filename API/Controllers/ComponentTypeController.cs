@@ -141,7 +141,7 @@ public class ComponentTypeController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetComponentTypeAttributes.Response>> GetComponentTypeAttributes(int componentTypeId)
     {
-        var request = new GetComponentTypeAttributes.Request { ComponentTypeId = componentTypeId };
+        var request = new GetComponentTypeAttributes.Request(componentTypeId);
         var result = await Svc<GetComponentTypeAttributes>().InvokeAsync(request);
         return Ok(result);
     }

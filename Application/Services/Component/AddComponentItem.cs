@@ -34,7 +34,7 @@ public class AddComponentItem(IServiceProvider serviceProvider)
             throw new BusinessException($"Component with ID {request.ComponentId} not found.");
         
         var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-            new GetComponentTypeAttributes.Request { ComponentTypeId = request.ComponentTypeId });
+            new GetComponentTypeAttributes.Request(request.ComponentTypeId));
         
         var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
         

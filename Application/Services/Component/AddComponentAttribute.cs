@@ -27,41 +27,22 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
     {
         var component = await uow.Repository<Data.Entities.Component>()
             .GetByIdAsync(request.ComponentId);
-        
-        if (component == null)
-            throw new BusinessException($"Component with ID {request.ComponentId} not found.");
-        
-        // Componentin type'ını kontrol et
-        if (component.ComponentTypeId != request.ComponentTypeId)
-            throw new BusinessException($"Component with ID {request.ComponentId} is not of type {request.ComponentTypeId}.");
-        
-        // Bu attribute type'a atanmış mı kontrol et
-        var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow, 
-            new GetComponentTypeAttributes.Request { ComponentTypeId = request.ComponentTypeId });
-        
-        var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
-        
-        if (!validAttributeIds.Contains(request.AttributeValue.ComponentTypeAttributeId))
-        {
-            throw new BusinessException($"Attribute with ID {request.AttributeValue.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-        }
-        
-        // Aynı attribute daha önce eklenmiş mi kontrol et
+
+        await ValidateComponentTypeRules(uow, request, component);
+
         var existingAttribute = await uow.Repository<Data.Entities.ComponentAttributeValue>()
-            .GetAsync(a => 
-                a.ComponentId == request.ComponentId && 
+            .GetAsync(a =>
+                a.ComponentId == request.ComponentId &&
                 a.ComponentTypeAttributeId == request.AttributeValue.ComponentTypeAttributeId);
-        
+
         if (existingAttribute != null)
         {
-            // Varsa güncelle
             existingAttribute.Value = request.AttributeValue.Value;
             existingAttribute.IsActive = request.IsActive;
             uow.Repository<Data.Entities.ComponentAttributeValue>().Update(existingAttribute);
         }
         else
         {
-            // Yoksa ekle
             var componentAttribute = new Data.Entities.ComponentAttributeValue
             {
                 ComponentId = request.ComponentId,
@@ -69,12 +50,31 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
                 Value = request.AttributeValue.Value,
                 IsActive = request.IsActive
             };
-            
+
             await uow.Repository<Data.Entities.ComponentAttributeValue>().AddAsync(componentAttribute);
         }
-        
+
         await uow.SaveChangesAsync();
-        
+
         return new Response { Success = true };
+    }
+
+    private async Task ValidateComponentTypeRules(GenericUoW uow, Request request, Data.Entities.Component component)
+    {
+        if (component == null)
+            throw new BusinessException($"Component with ID {request.ComponentId} not found.");
+
+        if (component.ComponentTypeId != request.ComponentTypeId)
+            throw new BusinessException($"Component with ID {request.ComponentId} is not of type {request.ComponentTypeId}.");
+
+        var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow,
+            new GetComponentTypeAttributes.Request(request.ComponentTypeId));
+
+        var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
+
+        if (!validAttributeIds.Contains(request.AttributeValue.ComponentTypeAttributeId))
+        {
+            throw new BusinessException($"Attribute with ID {request.AttributeValue.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
+        }
     }
 } 

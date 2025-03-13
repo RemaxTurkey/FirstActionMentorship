@@ -8,22 +8,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Attributes;
 
 namespace Application.Services.Component;
 
 public class GetComponentTypeAttributes(IServiceProvider serviceProvider)
     : BaseSvc<GetComponentTypeAttributes.Request, GetComponentTypeAttributes.Response>(serviceProvider)
 {
-    public class Request
-    {
-        public int ComponentTypeId { get; set; }
-    }
+    public record Request(int ComponentTypeId);
     
     public class Response
     {
         public List<ComponentTypeAttributeDto> Attributes { get; set; }
     }
     
+    [Cache("ComponentTypeAttributes_{ComponentTypeId}")]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
     {
         var componentType = await uow.Repository<Data.Entities.ComponentType>()

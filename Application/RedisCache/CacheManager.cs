@@ -71,11 +71,11 @@ public class CacheManager : ICacheManager
     
     public void BuildConfigOptions()
     {
-        var section = _configuration.GetSection("Redis");
+        var redisConnectionString = _configuration.GetConnectionString("Redis");
+        
         _configurationOptions = new()
         {
-            EndPoints = {section["Endpoint"]},
-            Password = section["password"],
+            EndPoints = { redisConnectionString },
             AllowAdmin = true,
             ConnectTimeout = 10000,
             SyncTimeout = 10000,
@@ -85,9 +85,10 @@ public class CacheManager : ICacheManager
     
     private void InitiateConfig()
     {
-        if (!_configuration.GetSection("Redis").Exists())
+        var redisConnectionString = _configuration.GetConnectionString("Redis");
+        if (string.IsNullOrEmpty(redisConnectionString))
         {
-            throw new("Can not process without a config.");
+            throw new Exception("Redis connection string is missing in configuration.");
         }
         
         BuildConfigOptions();

@@ -9,5 +9,10 @@ public class ContentComponentAssoc : Entity
     public int ComponentId { get; set; }
     
     public int Order { get; set; }
+
+    /// <summary>
+    /// Burası bir content category elemanı için bir component ise dolu olacak.
+    /// </summary>
+    public int? ContentCategoryId { get; set; }
     
 }

@@ -2,6 +2,7 @@ using API;
 using API.Extensions;
 using API.Filters;
 using Application.Extensions;
+using Application.RedisCache;
 using Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -14,8 +15,13 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers(options => { options.Filters.Add<ApiResponseAttribute>(); });
 
+builder.Logging.ConfigureLogging()
+    .ConfigureEntityFrameworkLogging(false, LogLevel.Debug);
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RemaxDB")));
+
+builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
 builder.Services.RegisterInjectableServices();
 builder.Services.AddCommonService();

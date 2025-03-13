@@ -15,7 +15,7 @@ public class ContentController : ApiControllerBase
     }
     
     [HttpGet("{Id}")]
-    public async Task<GetContent.Response> GetComponentType([FromRoute] GetContent.Request request)
+    public async Task<GetContent.Response> GetContent([FromRoute] GetContent.Request request)
     {
         var response = await Svc<GetContent>().InvokeNoTrackingAsync(request);
         return response;

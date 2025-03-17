@@ -26,7 +26,7 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
             IsActive = true,
             CreatedDate = DateTime.Now,
             ParentId = req.ParentId,
-            IsMenu = req.IsMenu
+            PageType = req.PageType
         };
 
         foreach (var component in req.Components)
@@ -58,12 +58,31 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
                     }
                 });
             }
+
+            if (component.Items != null && component.Items.Count > 0)
+            {
+                foreach (var item in component.Items)
+                {
+                    await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
+                    {
+                        ComponentId = contentComponentAssoc.ComponentId,
+                        ComponentTypeId = component.ComponentTypeId,
+                        Item = item,
+                        IsActive = true
+                    });
+                }
+            }
         
         }
         
         await uow.SaveChangesAsync();
 
-        return new();
+        var createdContentResponse = await Svc<GetContentForUpdate>().InvokeAsync(uow, new GetContentForUpdate.Request(content.Id));
+
+        return new Response
+        {
+            Item = createdContentResponse.Item
+        };
     }
 
     private void ValidateComponents(Request request)
@@ -79,7 +98,7 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
         public int? ParentId { get; set; }
         public string Header { get; set; }
         public List<ContentCreationComponentDto> Components { get; set; }
-        public bool IsMenu { get; set; }
+        public PageType PageType { get; set; }
     }
     
     public class ContentCreationComponentDto 
@@ -98,6 +117,6 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
 
     public class Response
     {
-        public ContentDto Item { get; set; }
+        public GetContentForUpdate.ContentDetailViewModel Item { get; set; }
     }
 }

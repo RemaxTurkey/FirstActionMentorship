@@ -9,7 +9,14 @@ public class Content : Entity
     
     public string Header { get; set; }
     public DateTime CreatedDate { get; set; }
-    public bool IsMenu { get; set; }
+    public PageType PageType { get; set; }
 
     public ICollection<ContentComponentAssoc> ContentComponentAssocs { get; set; }
+}
+
+public enum PageType
+{
+    Content,
+    Menu,
+    Static
 }

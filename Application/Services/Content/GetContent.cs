@@ -1,5 +1,7 @@
 ﻿using System.Dynamic;
 using System.Globalization;
+using System.Threading.Tasks;
+using Application.Constants;
 using Application.Exceptions;
 using Application.Services.Base;
 using Application.Services.Component;
@@ -32,28 +34,17 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         {
             throw new BusinessException("Content not found");
         }
-
-        var componentIds = contentData.Components.Select(c => c.Id).ToList();
-        var componentTypeId = contentData.Components.First().ComponentTypeId;
         
-        var cachedAttributeResponse = await Svc<GetComponentAttributesCached>().InvokeAsync(
+        // Her bir component için ayrı ayrı işlem yapacağımız için, burada genel ComponentTypeId kullanmıyoruz
+        var dynamicComponents = await CreateDynamicComponents(
             uow,
-            new GetComponentAttributesCached.Request(componentTypeId, componentIds));
-        
-        var attributeData = (
-            cachedAttributeResponse.DefaultAttributes,
-            cachedAttributeResponse.AttributesByComponentId
-        );
-
-        var dynamicComponents = CreateDynamicComponents(
+            req,
             contentData.Components,
-            contentData.ContentComponentAssoc,
-            attributeData.DefaultAttributes,
-            attributeData.AttributesByComponentId);
+            contentData.ContentComponentAssoc);
 
-        var isMenu = contentData.ContentComponentAssoc.First().Content.IsMenu;
+        var isContent = contentData.ContentComponentAssoc.First().Content.PageType;
 
-        if (!isMenu)
+        if (isContent == PageType.Content)
         {
             var contentEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
                 .FindBy(x => x.ContentId == contentData.ContentComponentAssoc.First().ContentId && x.EmployeeId == req.EmployeeId)
@@ -66,10 +57,12 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                     ContentId = contentData.ContentComponentAssoc.First().Content.ParentId!.Value,
                     EmployeeId = req.EmployeeId,
                     CompletionDate = DateTime.Now,
-                    IsActive = true
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
                 };
 
                 await uow.Repository<ContentEmployeeAssoc>().AddAsync(contentEmployeeAssoc);
+                await uow.SaveChangesAsync();
             }
         }
 
@@ -85,36 +78,73 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         };
     }
 
-    private List<dynamic> CreateDynamicComponents(
+    private async Task<List<dynamic>> CreateDynamicComponents(
+        GenericUoW uow,
+        Request req,
         List<Data.Entities.Component> components,
-        List<ContentComponentAssoc> contentComponentAssoc,
-        List<ComponentTypeAttributeDto> defaultAttributes,
-        Dictionary<int, Dictionary<int, ComponentAttributeValue>> attributesByComponentId)
+        List<ContentComponentAssoc> contentComponentAssoc)
     {
         var dynamicComponents = new List<dynamic>();
         var componentOrderMap = contentComponentAssoc.ToDictionary(x => x.ComponentId, x => x.Order);
 
+        // Her bir component için ayrı ayrı işlem yap
         foreach (var component in components)
         {
-            var componentAttributes = attributesByComponentId.TryGetValue(component.Id, out var value)
-                ? value
-                : new Dictionary<int, ComponentAttributeValue>();
-
+            // Her component için kendi ComponentTypeId'sini kullan
+            var componentTypeId = component.ComponentTypeId;
+            
+            // Bu component tipi için attribute'ları al
+            var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(
+                uow, new GetComponentTypeAttributes.Request(componentTypeId));
+            
+            var componentTypeAttributes = typeAttributesResponse.Attributes;
+            
+            // Component'in mevcut attribute değerlerini al
+            var componentAttributeValues = await uow.Repository<ComponentAttributeValue>()
+                .FindByNoTracking(cav => cav.ComponentId == component.Id && cav.IsActive)
+                .Include(cav => cav.ComponentTypeAttribute)
+                .ToListAsync();
+            
+            // Component için dynamicObject oluştur
             var componentExpando = new ExpandoObject() as IDictionary<string, object>;
-
+            
             componentExpando["Id"] = component.Id;
             componentExpando["TypeId"] = component.ComponentType?.Id;
             componentExpando["Type"] = component.ComponentType?.Title;
             componentExpando["Order"] = componentOrderMap.GetValueOrDefault(component.Id, 0);
-
-            foreach (var attr in defaultAttributes)
+            
+            // Her bir attribute için değeri ata
+            foreach (var attr in componentTypeAttributes)
             {
                 var attributeName = attr.Name;
                 string stringValue = null;
                 
-                if (componentAttributes.TryGetValue(attr.Id!.Value, out var attrValue))
+                if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
-                    stringValue = attrValue.Value;
+                    var parentId = contentComponentAssoc.First().Content.ParentId;
+                    
+                    if (parentId.HasValue)
+                    {
+                        var complated = await Svc<CheckContentCompletion>()
+                        .InvokeAsync(uow, new CheckContentCompletion.Request(parentId.Value, req.EmployeeId));
+
+                        stringValue = complated.AllContentsCompleted ? "true" : "false";
+                    }
+                    else
+                    {
+                        stringValue = "false";
+                    }
+                }
+                else
+                {
+                    // ComponentAttributeValue tablosundan doğrudan bu component ve attribute için değeri al
+                    var attributeValue = componentAttributeValues
+                        .FirstOrDefault(cav => cav.ComponentTypeAttributeId == attr.Id);
+                    
+                    if (attributeValue != null)
+                    {
+                        stringValue = attributeValue.Value;
+                    }
                 }
                 
                 var typedValue = ConvertToTypedValue(stringValue, attr.DataType);

@@ -1,7 +1,11 @@
 ﻿using API.Controllers.Base;
+using Application.Services.Component;
 using Application.Services.Content;
+using Application.Services.Content.DTOs;
 using Application.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace API.Controllers;
 
@@ -14,17 +18,107 @@ public class ContentController : ApiControllerBase
         return response;
     }
     
-    [HttpGet("{Id}")]
+    [HttpGet("{Id}/Employee/{EmployeeId}")]
     public async Task<GetContent.Response> GetContent([FromRoute] GetContent.Request request)
     {
         var response = await Svc<GetContent>().InvokeNoTrackingAsync(request);
         return response;
     }
 
-    [HttpPost("save/{SaveContentId}/{NextContentId}")]
+    [HttpPost("save/{SaveContentId}/next/{NextContentId}/employee/{EmployeeId}")]
     public async Task<SaveAndGetNextContent.Response> SaveAndGetNextContent([FromRoute] SaveAndGetNextContent.Request request)
     {
         var response = await Svc<SaveAndGetNextContent>().InvokeAsync(request);
         return response;
+    }
+
+    [HttpPut("{Id}")]
+    public async Task<UpdateContent.Response> UpdateContent([FromRoute] int Id, [FromBody] UpdateContent.Request request)
+    {
+        request.Id = Id;
+        var response = await Svc<UpdateContent>().InvokeAsync(request);
+        return response;
+    }
+
+    [HttpGet("edit/{Id}")]
+    public async Task<UpdateContent.Request> GetContentForUpdate([FromRoute] int Id)
+    {
+        var request = new GetContentForUpdate.Request(Id);
+        var contentResponse = await Svc<GetContentForUpdate>().InvokeNoTrackingAsync(request);
+        
+        // GetContentForUpdate.Response'u UpdateContent.Request'e dönüştürüyoruz
+        var updateRequest = new UpdateContent.Request
+        {
+            Id = contentResponse.Item.ContentId,
+            Header = contentResponse.Item.Header,
+            ParentId = contentResponse.Item.ParentId,
+            PageType = Data.Entities.PageType.Content, // Varsayılan olarak Content tipini kullanıyoruz, gerekirse değiştirilebilir
+            Components = new List<UpdateContent.UpdateContentComponentDto>()
+        };
+
+        // Componentleri dönüştürme
+        if (contentResponse.Item.Components != null)
+        {
+            foreach (dynamic component in contentResponse.Item.Components)
+            {
+                // Component dinamik olduğu için, gerekli özellikleri doğru şekilde elde etmemiz gerekiyor
+                int componentId = (int)component.Id;
+                int componentTypeId = (int)component.TypeId;
+                int order = (int)component.Order;
+
+                // ComponentType için geçerli attribute'ları al
+                var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeNoTrackingAsync(
+                    new GetComponentTypeAttributes.Request(componentTypeId));
+                
+                var componentTypeAttributes = typeAttributesResponse.Attributes;
+                
+                var componentDto = new UpdateContent.UpdateContentComponentDto
+                {
+                    Id = componentId,
+                    ComponentTypeId = componentTypeId,
+                    Order = order,
+                    Items = new List<UpdateContent.UpdateComponentItemDto>(),
+                    AttributeValue = new List<UpdateContent.UpdateContentComponentTypeAttributeValueDto>()
+                };
+
+                // Component'in mevcut attribute değerlerini al
+                var componentDetailResponse = await Svc<GetComponent>().InvokeNoTrackingAsync(
+                    new GetComponent.Request { Id = componentId });
+                
+                var componentDetail = componentDetailResponse.Item;
+                
+                // Mevcut AttributeValue'ları ekle
+                if (componentDetail.ComponentTypeAttributeValues != null)
+                {
+                    foreach (var attrValue in componentDetail.ComponentTypeAttributeValues)
+                    {
+                        componentDto.AttributeValue.Add(new UpdateContent.UpdateContentComponentTypeAttributeValueDto
+                        {
+                            Id = attrValue.Id,
+                            ComponentTypeAttributeId = attrValue.ComponentTypeAttributeId,
+                            Value = attrValue.Value
+                        });
+                    }
+                }
+                
+                // Mevcut Item'ları ekle
+                if (componentDetail.Items != null)
+                {
+                    foreach (var item in componentDetail.Items)
+                    {
+                        componentDto.Items.Add(new UpdateContent.UpdateComponentItemDto
+                        {
+                            Id = null, // Item ID'sini burada belirleyemiyoruz
+                            AttributeId = item.AttributeId,
+                            Value = item.Value
+                        });
+                    }
+                }
+
+                updateRequest.Components.Add(componentDto);
+            }
+        }
+
+        return updateRequest;
     }
 }

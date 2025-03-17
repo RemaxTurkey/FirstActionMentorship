@@ -72,7 +72,6 @@ namespace Application.Services.ComponentType
                     }
                     else
                     {
-                        // Mevcut attribute'u güncelle
                         var existingAttribute = await uow.Repository<Data.Entities.ComponentTypeAttribute>()
                             .GetByIdAsync(attributeDto.Id.Value);
                         
@@ -86,7 +85,6 @@ namespace Application.Services.ComponentType
                     }
                 }
                 
-                // Attribute değişikliklerini kaydet
                 await uow.SaveChangesAsync();
             }
 

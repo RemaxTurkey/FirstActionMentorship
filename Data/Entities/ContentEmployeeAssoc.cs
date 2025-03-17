@@ -9,4 +9,5 @@ public class ContentEmployeeAssoc : Entity
 
     public bool IsCompleted { get; set; }
     public DateTime? CompletionDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

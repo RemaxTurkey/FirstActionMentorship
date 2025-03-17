@@ -17,21 +17,30 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var contentEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
-            .FindBy(x => x.ContentId == req.SaveContentId && x.EmployeeId == req.EmployeeId)
+            .FindBy(x => x.ContentId == req.NextContentId && x.EmployeeId == req.EmployeeId)
             .FirstOrDefaultAsync();
 
         if (contentEmployeeAssoc != null)
         {
-            var contentEmployeeRecord = new ContentEmployeeRecord
+            var recordIsExist = await uow.Repository<ContentEmployeeRecord>()
+                .FindByNoTracking(x => x.ContentId == req.SaveContentId 
+                    && x.ContentEmployeeAssocId == contentEmployeeAssoc.Id)
+                .FirstOrDefaultAsync();
+
+            if (recordIsExist == null)
             {
-                ContentId = req.SaveContentId,
-                CompletionDate = DateTime.Now,
-                ContentEmployeeAssocId = contentEmployeeAssoc.Id,
-                IsActive = true
-            };
+                var contentEmployeeRecord = new ContentEmployeeRecord
+                {
+                    ContentId = req.SaveContentId,
+                    CompletionDate = DateTime.Now,
+                    ContentEmployeeAssocId = contentEmployeeAssoc.Id,
+                    IsActive = true
+                };
 
-            await uow.Repository<ContentEmployeeRecord>().AddAsync(contentEmployeeRecord);
-
+                await uow.Repository<ContentEmployeeRecord>().AddAsync(contentEmployeeRecord);
+                await uow.SaveChangesAsync();
+            }
+            
             var parentContentId = await uow.Repository<Data.Entities.Content>()
                 .FindByNoTracking(x => x.Id == req.SaveContentId)
                 .Select(x => x.ParentId)

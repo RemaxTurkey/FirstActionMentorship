@@ -14,7 +14,7 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var siblingContents = await uow.Repository<Data.Entities.Content>()
-            .FindByNoTracking(x => x.ParentId == req.ParentContentId && !x.IsMenu)
+            .FindByNoTracking(x => x.ParentId == req.ParentContentId)
             .ToListAsync();
 
         var siblingContentIds = siblingContents.Select(x => x.Id).ToList();
@@ -40,6 +40,7 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
                 parentAssoc.IsCompleted = true;
                 parentAssoc.CompletionDate = DateTime.Now;
                 uow.Repository<ContentEmployeeAssoc>().Update(parentAssoc);
+                await uow.SaveChangesAsync();
             }
         }
 

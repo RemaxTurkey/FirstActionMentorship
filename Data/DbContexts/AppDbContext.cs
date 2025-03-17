@@ -43,9 +43,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttribute", "fam");
         modelBuilder.Entity<ComponentTypeAttributeAssoc>().ToTable("ComponentTypeAttributeAssoc", "fam");
         modelBuilder.Entity<Content>().ToTable("Content", "fam");
-        modelBuilder.Entity<ContentCategory>().ToTable("ContentCategory", "fam");
-        modelBuilder.Entity<ContentCategoryEmployeeAssoc>().ToTable("ContentCategoryEmployeeAssoc", "fam");
-        modelBuilder.Entity<ContentCategoryEmployeeRecord>().ToTable("ContentCategoryEmployeeRecord", "fam");
+        modelBuilder.Entity<ContentEmployeeAssoc>().ToTable("ContentEmployeeAssoc", "fam");
+        modelBuilder.Entity<ContentEmployeeRecord>().ToTable("ContentEmployeeRecord", "fam");
         modelBuilder.Entity<ContentComponentAssoc>().ToTable("ContentComponentAssoc", "fam");
 
         // [dbo]
@@ -67,9 +66,8 @@ public class AppDbContext : DbContext
     public DbSet<ComponentTypeAttribute> ComponentTypeAttributes { get; set; }
     public DbSet<ComponentTypeAttributeAssoc> ComponentTypeAttributeAssocs { get; set; }
     public DbSet<Content> Contents { get; set; }
-    public DbSet<ContentCategory> ContentCategories { get; set; }
-    public DbSet<ContentCategoryEmployeeAssoc> ContentCategoryEmployeeAssocs { get; set; }
-    public DbSet<ContentCategoryEmployeeRecord> ContentCategoryEmployeeRecords { get; set; }
+    public DbSet<ContentEmployeeAssoc> ContentEmployeeAssocs { get; set; }
+    public DbSet<ContentEmployeeRecord> ContentEmployeeRecords { get; set; }
     public DbSet<ContentComponentAssoc> ContentComponentAssocs { get; set; }
 
     #endregion

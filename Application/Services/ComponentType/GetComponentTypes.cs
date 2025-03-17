@@ -24,6 +24,8 @@ public class GetComponentTypes(IServiceProvider serviceProvider)
         {
             var allComponentTypes = await uow.Repository<Data.Entities.ComponentType>()
                 .GetAll()
+                .Include(x => x.ComponentTypeAttributeAssocs)
+                .ThenInclude(x => x.ComponentTypeAttribute)
                 .OrderBy(x => x.Id)
                 .ToListAsync();
 

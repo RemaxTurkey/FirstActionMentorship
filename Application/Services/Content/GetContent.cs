@@ -19,11 +19,31 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
-        var contentData = await GetContentDataAsync(uow, req.Id);
+        var cachedContentResponse = await Svc<GetContentCached>().InvokeAsync(
+            uow, 
+            new GetContentCached.Request(req.Id.Value));
+        
+        var contentData = (
+            cachedContentResponse.ContentComponentAssoc,
+            cachedContentResponse.Components
+        );
 
-        if (contentData.ContentComponentAssoc.Count == 0) throw new BusinessException("Content not found");
+        if (contentData.ContentComponentAssoc.Count == 0) 
+        {
+            throw new BusinessException("Content not found");
+        }
 
-        var attributeData = await GetComponentAttributeDataAsync(uow, contentData.Components);
+        var componentIds = contentData.Components.Select(c => c.Id).ToList();
+        var componentTypeId = contentData.Components.First().ComponentTypeId;
+        
+        var cachedAttributeResponse = await Svc<GetComponentAttributesCached>().InvokeAsync(
+            uow,
+            new GetComponentAttributesCached.Request(componentTypeId, componentIds));
+        
+        var attributeData = (
+            cachedAttributeResponse.DefaultAttributes,
+            cachedAttributeResponse.AttributesByComponentId
+        );
 
         var dynamicComponents = CreateDynamicComponents(
             contentData.Components,
@@ -31,58 +51,38 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             attributeData.DefaultAttributes,
             attributeData.AttributesByComponentId);
 
+        var isMenu = contentData.ContentComponentAssoc.First().Content.IsMenu;
+
+        if (!isMenu)
+        {
+            var contentEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
+                .FindBy(x => x.ContentId == contentData.ContentComponentAssoc.First().ContentId && x.EmployeeId == req.EmployeeId)
+                .FirstOrDefaultAsync();
+
+            if (contentEmployeeAssoc == null)
+            {
+                contentEmployeeAssoc = new ContentEmployeeAssoc
+                {
+                    ContentId = contentData.ContentComponentAssoc.First().Content.ParentId!.Value,
+                    EmployeeId = req.EmployeeId,
+                    CompletionDate = DateTime.Now,
+                    IsActive = true
+                };
+
+                await uow.Repository<ContentEmployeeAssoc>().AddAsync(contentEmployeeAssoc);
+            }
+        }
+
         return new Response
         {
             Item = new ContentDetailViewModel
             {
                 ContentId = contentData.ContentComponentAssoc.First().ContentId,
-                ContentCategoryId = contentData.ContentComponentAssoc.First().Content.ContentCategoryId,
+                ParentId = contentData.ContentComponentAssoc.First().Content.ParentId,
                 Header = contentData.ContentComponentAssoc.First().Content.Header ?? string.Empty,
                 Components = dynamicComponents
             }
         };
-    }
-
-    private async Task<(List<ContentComponentAssoc> ContentComponentAssoc, List<Data.Entities.Component> Components)>
-        GetContentDataAsync(GenericUoW uow, int? contentId)
-    {
-        var contentComponentAssoc = await uow.Repository<ContentComponentAssoc>()
-            .FindByNoTracking(x => x.ContentId == contentId)
-            .Include(x => x.Content.ContentCategory.Parent)
-            .Include(x => x.Component.ComponentType)
-            .AsSplitQuery()
-            .ToListAsync();
-
-        var components = contentComponentAssoc
-            .Select(x => x.Component)
-            .ToList();
-
-        return (contentComponentAssoc, components);
-    }
-
-    private async Task<(List<ComponentTypeAttributeDto> DefaultAttributes,
-            Dictionary<int, Dictionary<int, ComponentAttributeValue>> AttributesByComponentId)>
-        GetComponentAttributeDataAsync(GenericUoW uow, List<Data.Entities.Component> components)
-    {
-        var componentIds = components.Select(c => c.Id).ToList();
-
-        var defaultComponentAttributes = (await Svc<GetComponentTypeAttributes>()
-                .InvokeNoTrackingAsync(new GetComponentTypeAttributes.Request(components.First().ComponentTypeId)))
-            .Attributes;
-
-        var componentAttributeValues = await uow.Repository<ComponentAttributeValue>()
-            .FindByNoTracking(x => componentIds.Contains(x.ComponentId))
-            .Include(x => x.ComponentTypeAttribute)
-            .ToListAsync();
-
-        var attributesByComponentId = componentAttributeValues
-            .GroupBy(x => x.ComponentId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.ToDictionary(a => a.ComponentTypeAttributeId, a => a)
-            );
-
-        return (defaultComponentAttributes, attributesByComponentId);
     }
 
     private List<dynamic> CreateDynamicComponents(
@@ -190,7 +190,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         }
     }
 
-    public record Request(int? Id);
+    public record Request(int? Id, int EmployeeId);
 
     public class Response
     {
@@ -201,8 +201,8 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     {
         public int ContentId { get; set; }
         public string Header { get; set; }
-        public string ContentCategoryName { get; set; }
-        public int ContentCategoryId { get; set; }
+        public string ParentName { get; set; }
+        public int? ParentId { get; set; }
 
         public dynamic Components { get; set; }
     }

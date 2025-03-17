@@ -24,8 +24,7 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
             Header = req.Header,
             IsActive = req.IsActive,
             CreatedDate = DateTime.Now,
-            Title = req.Title,
-            ContentCategoryId = req.ContentCategoryId,
+            ParentId = req.ParentId,
         };
         
         await uow.Repository<ContentComponentAssoc>()

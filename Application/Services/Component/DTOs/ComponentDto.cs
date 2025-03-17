@@ -13,7 +13,6 @@ public class ComponentDto
     public List<ComponentTypeAttributeValueDto> ComponentTypeAttributeValues { get; set; }
     public bool IsActive { get; set; } = true;
     public ComponentTypeDto Type { get; set; }
-    public int? ContentCategoryId { get; set; }
 }
 
 public class ComponentItemDto

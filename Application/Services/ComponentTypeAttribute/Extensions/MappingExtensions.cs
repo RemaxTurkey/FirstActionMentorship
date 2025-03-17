@@ -9,6 +9,6 @@ public static partial class MappingExtensions
         {
             Id = attribute.Id,
             Name = attribute.Name, 
-            DataType = attribute.DataType 
+            DataType = attribute.DataType
         };
 } 

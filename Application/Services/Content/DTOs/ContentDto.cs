@@ -4,8 +4,7 @@ namespace Application.Services.Content.DTOs;
 
 public class ContentDto
 {
-    public int Id { get; set; }
-    public string Title { get; set; }
+    public int? Id { get; set; }
     public int? ParentId { get; set; }
     public bool IsActive { get; set; } = true;
     public string Header { get; set; }

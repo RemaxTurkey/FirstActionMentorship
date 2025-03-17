@@ -67,7 +67,6 @@ public class CreateComponent(IServiceProvider serviceProvider)
                 await Svc<AddComponentTypeAttributeValue>().InvokeAsync(uow, new AddComponentTypeAttributeValue.Request
                 {
                     ComponentId = newComponent.Id,
-                    ComponentTypeId = request.ComponentTypeId,
                     AttributeValue = attrDto,
                     IsActive = request.IsActive
                 });

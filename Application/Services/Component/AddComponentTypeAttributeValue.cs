@@ -13,7 +13,6 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
     public class Request
     {
         public int ComponentId { get; set; }
-        public int ComponentTypeId { get; set; }
         public ComponentTypeAttributeValueDto AttributeValue { get; set; }
         public bool IsActive { get; set; } = true;
     }
@@ -38,7 +37,7 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         if (existingAttribute != null)
         {
             existingAttribute.Value = request.AttributeValue.Value;
-            existingAttribute.IsActive = request.IsActive;
+            existingAttribute.IsActive = true;
             uow.Repository<Data.Entities.ComponentAttributeValue>().Update(existingAttribute);
         }
         else
@@ -48,7 +47,7 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
                 ComponentId = request.ComponentId,
                 ComponentTypeAttributeId = request.AttributeValue.ComponentTypeAttributeId,
                 Value = request.AttributeValue.Value,
-                IsActive = request.IsActive
+                IsActive = true
             };
 
             await uow.Repository<Data.Entities.ComponentAttributeValue>().AddAsync(componentAttribute);
@@ -59,22 +58,11 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         return new Response { Success = true };
     }
 
-    private async Task ValidateComponentTypeRules(GenericUoW uow, Request request, Data.Entities.Component component)
+    private static async Task ValidateComponentTypeRules(GenericUoW uow, Request request, Data.Entities.Component component)
     {
         if (component == null)
-            throw new BusinessException($"Component with ID {request.ComponentId} not found.");
-
-        if (component.ComponentTypeId != request.ComponentTypeId)
-            throw new BusinessException($"Component with ID {request.ComponentId} is not of type {request.ComponentTypeId}.");
-
-        var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(uow,
-            new GetComponentTypeAttributes.Request(request.ComponentTypeId));
-
-        var validAttributeIds = typeAttributesResponse.Attributes.Select(a => a.Id.Value).ToList();
-
-        if (!validAttributeIds.Contains(request.AttributeValue.ComponentTypeAttributeId))
-        {
-            throw new BusinessException($"Attribute with ID {request.AttributeValue.ComponentTypeAttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-        }
+            {
+                throw new BusinessException($"Component with ID {request.ComponentId} not found.");
+            }
     }
 } 

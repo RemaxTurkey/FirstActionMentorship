@@ -58,7 +58,8 @@ namespace Application.Services.ComponentType
                             new CreateComponentTypeAttribute.Request
                             {
                                 Name = attributeDto.Name,
-                                IsActive = req.IsActive
+                                IsActive = req.IsActive,
+                                DataType = attributeDto.DataType
                             });
                         
                         await Svc<AssignAttributeToComponentType>().InvokeAsync(uow, 
@@ -69,7 +70,24 @@ namespace Application.Services.ComponentType
                                 IsActive = req.IsActive
                             });
                     }
+                    else
+                    {
+                        // Mevcut attribute'u güncelle
+                        var existingAttribute = await uow.Repository<Data.Entities.ComponentTypeAttribute>()
+                            .GetByIdAsync(attributeDto.Id.Value);
+                        
+                        if (existingAttribute != null)
+                        {
+                            existingAttribute.Name = attributeDto.Name;
+                            existingAttribute.DataType = attributeDto.DataType;
+                            
+                            uow.Repository<Data.Entities.ComponentTypeAttribute>().Update(existingAttribute);
+                        }
+                    }
                 }
+                
+                // Attribute değişikliklerini kaydet
+                await uow.SaveChangesAsync();
             }
 
             var updatedComponentType = componentType.ToDto();

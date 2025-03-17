@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Application.Exceptions;
 using Application.Services.Base;
+using Application.Services.Component;
 using Application.Services.Component.DTOs;
 using Application.Services.Content.DTOs;
 using Application.UnitOfWorks;
@@ -22,21 +23,44 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
         var content = new Data.Entities.Content
         {
             Header = req.Header,
-            IsActive = req.IsActive,
+            IsActive = true,
             CreatedDate = DateTime.Now,
             ParentId = req.ParentId,
+            IsMenu = req.IsMenu
         };
-        
-        await uow.Repository<ContentComponentAssoc>()
-            .AddRangeAsync(req.Components!.Select(x =>
-                new ContentComponentAssoc()
-                {
-                    ComponentId = x.Id!.Value,
-                    IsActive = x.IsActive,
-                    Content = content,
-                    Order = x.Order!.Value})
-                .ToList());
 
+        foreach (var component in req.Components)
+        {
+            var contentComponentAssoc = new ContentComponentAssoc()
+            {
+                Component = new Data.Entities.Component
+                {
+                    ComponentTypeId = component.ComponentTypeId,
+                    IsActive = true
+                },
+                IsActive = true,
+                Content = content,
+                Order = component.Order
+            };
+
+            await uow.Repository<ContentComponentAssoc>().AddAsync(contentComponentAssoc);
+            await uow.SaveChangesAsync();
+            
+            foreach(var attribute in component.AttributeValue)
+            {
+                await Svc<AddComponentTypeAttributeValue>().InvokeAsync(uow, new AddComponentTypeAttributeValue.Request{
+                    ComponentId = contentComponentAssoc.ComponentId,
+                    AttributeValue = new ComponentTypeAttributeValueDto
+                    {
+                        ComponentId = contentComponentAssoc.ComponentId,
+                        ComponentTypeAttributeId = attribute.ComponentTypeAttributeId,
+                        Value = attribute.Value
+                    }
+                });
+            }
+        
+        }
+        
         await uow.SaveChangesAsync();
 
         return new();
@@ -48,14 +72,29 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
         {
             throw new BusinessException("Components are required");
         }
-
-        if (request.Components.Any(x => x.Order is null))
-        {
-            throw new BusinessException("Order is required");
-        }
     }
 
-    public class Request : ContentDto;
+    public class Request
+    {
+        public int? ParentId { get; set; }
+        public string Header { get; set; }
+        public List<ContentCreationComponentDto> Components { get; set; }
+        public bool IsMenu { get; set; }
+    }
+    
+    public class ContentCreationComponentDto 
+    {
+        public int ComponentTypeId { get; set; }
+        public int Order { get; set; }
+        public List<ComponentItemDto> Items { get; set; }
+        public List<ContentCreationComponentTypeAttributeValueDto> AttributeValue { get; set; } = new();
+    }
+
+    public class ContentCreationComponentTypeAttributeValueDto
+    {
+        public int ComponentTypeAttributeId { get; set; }
+        public string Value { get; set; }
+    }
 
     public class Response
     {

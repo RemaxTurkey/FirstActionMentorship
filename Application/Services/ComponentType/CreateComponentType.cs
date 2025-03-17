@@ -43,7 +43,8 @@ namespace Application.Services.ComponentType
                         new CreateComponentTypeAttribute.Request
                         {
                             Name = attributeDto.Name,
-                            IsActive = req.IsActive
+                            IsActive = req.IsActive,
+                            DataType = attributeDto.DataType
                         })).Item.Id!.Value;
 
                     // Sonra bu attribute'u ComponentType ile ilişkilendir

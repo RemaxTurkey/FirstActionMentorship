@@ -2,6 +2,7 @@
 
 public class Employee : Entity
 {
+    public int Id { get; set; }
     public int? MasterEmployeeId { get; set; }
     public bool? EmployeeHasOwnCompany { get; set; }
     public string EmployeeNo { get; set; }
@@ -119,4 +120,6 @@ public class Employee : Entity
     public bool? ShowFirstLoginMessage { get; set; }
     public short? ChildrenCount { get; set; }
     public int? ReferenceEmployeeId { get; set; }
+    
+    public override bool IsActive => true;
 }

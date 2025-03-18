@@ -21,7 +21,7 @@ public class AppDbContext : DbContext
         // Global query filter - tüm entity'ler için IsActive = true olanları filtrele
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(Entity).IsAssignableFrom(entityType.ClrType))
+            if (typeof(Entity).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(Employee))
             {
                 // Global query filter uygula
                 var method = typeof(AppDbContext).GetMethod(nameof(SetGlobalQueryForEntity), 
@@ -48,7 +48,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ContentComponentAssoc>().ToTable("ContentComponentAssoc", "fam");
 
         // [dbo]
-        modelBuilder.Entity<Employee>().ToTable("Employee", "dbo");
+        modelBuilder.Entity<Employee>()
+            .ToTable("Employee", "dbo")
+            .Ignore(e => e.IsActive);
 
         base.OnModelCreating(modelBuilder);
     }

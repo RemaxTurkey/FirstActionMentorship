@@ -2,6 +2,7 @@
 using Application.Services.Component;
 using Application.Services.Content;
 using Application.Services.Content.DTOs;
+using Application.Services.Employee;
 using Application.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -120,5 +121,12 @@ public class ContentController : ApiControllerBase
         }
 
         return updateRequest;
+    }
+
+    [HttpPost("employee/video")]
+    public async Task<SetEmployeeVideoLink.Response> SetEmployeeVideoLink([FromBody] SetEmployeeVideoLink.Request request)
+    {
+        var response = await Svc<SetEmployeeVideoLink>().InvokeAsync(request);
+        return response;
     }
 }

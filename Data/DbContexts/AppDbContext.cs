@@ -21,7 +21,6 @@ public class AppDbContext : DbContext
         // Global query filter - tüm entity'ler için IsActive = true olanları filtrele
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            // Employee sınıfı için query filter uygulamıyoruz
             if (typeof(Entity).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(Employee))
             {
                 // Global query filter uygula
@@ -51,7 +50,7 @@ public class AppDbContext : DbContext
         // [dbo]
         modelBuilder.Entity<Employee>()
             .ToTable("Employee", "dbo")
-            .Ignore(e => e.IsActive); // IsActive property'sini veritabanı mapping'den hariç tut
+            .Ignore(e => e.IsActive);
 
         base.OnModelCreating(modelBuilder);
     }

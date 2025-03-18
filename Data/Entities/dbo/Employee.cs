@@ -120,7 +120,6 @@ public class Employee : Entity
     public bool? ShowFirstLoginMessage { get; set; }
     public short? ChildrenCount { get; set; }
     public int? ReferenceEmployeeId { get; set; }
-
-    // IsActive özelliğini override et (core EF mapping için)
+    
     public override bool IsActive => true;
 }

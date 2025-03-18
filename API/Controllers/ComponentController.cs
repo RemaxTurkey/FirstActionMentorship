@@ -1,6 +1,7 @@
 using API.Controllers.Base;
 using Application.Services.Component;
 using Application.Services.Component.DTOs;
+using Application.UnitOfWorks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -12,6 +13,23 @@ namespace API.Controllers;
 [Produces("application/json")]
 public class ComponentController : ApiControllerBase
 {
+    /// <summary>
+    /// Bir bileşen bilgilerini getirir
+    /// </summary>
+    /// <param name="request">Bileşen bilgileri</param>
+    /// <response code="200">Bileşen başarıyla getirildi</response>
+    /// <response code="400">Geçersiz istek</response>
+    /// <response code="404">Bileşen bulunamadı</response>
+    [HttpGet("{Id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<GetComponent.Response> GetComponent([FromRoute] GetComponent.Request request)
+    {
+        var response = await Svc<GetComponent>().InvokeNoTrackingAsync(request);
+        return response;
+    }
+
     /// <summary>
     /// Yeni bir bileşen oluşturur
     /// </summary>
@@ -46,10 +64,10 @@ public class ComponentController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ComponentDto>> CreateComponent([FromBody] CreateComponent.Request request)
+    public async Task<CreateComponent.Response> CreateComponent([FromBody] CreateComponent.Request request)
     {
-        var result = await Svc<CreateComponent>().InvokeNoTrackingAsync(request);
-        return Created($"api/components/{result.Item.Id}", result.Item);
+        var response = await Svc<CreateComponent>().InvokeAsync(request);
+        return response;
     }
 
     /// <summary>
@@ -86,5 +104,41 @@ public class ComponentController : ApiControllerBase
         
         var result = await Svc<AddComponentItem>().InvokeNoTrackingAsync(request);
         return Created($"api/components/{componentId}/items", result.Success);
+    }
+
+    /// <summary>
+    /// Bir bileşen bilgilerini günceller
+    /// </summary>
+    /// <param name="Id">Bileşen ID</param>
+    /// <param name="request">Bileşen bilgileri</param>
+    /// <response code="200">Bileşen başarıyla güncellendi</response>
+    /// <response code="400">Geçersiz istek</response>
+    /// <response code="404">Bileşen bulunamadı</response>
+    [HttpPut("{Id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<UpdateComponent.Response> UpdateComponent([FromRoute] int Id, [FromBody] UpdateComponent.Request request)
+    {
+        request.Id = Id;
+        var response = await Svc<UpdateComponent>().InvokeAsync(request);
+        return response;
+    }
+
+    /// <summary>
+    /// Birden fazla bileşen bilgilerini günceller
+    /// </summary>
+    /// <param name="request">Bileşenlerin bilgileri</param>
+    /// <response code="200">Bileşenler başarıyla güncellendi</response>
+    /// <response code="400">Geçersiz istek</response>
+    /// <response code="404">Bileşen bulunamadı</response>
+    [HttpPut("batch")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<UpdateComponentBatch.Response> UpdateComponentBatch([FromBody] UpdateComponentBatch.Request request)
+    {
+        var response = await Svc<UpdateComponentBatch>().InvokeAsync(request);
+        return response;
     }
 } 

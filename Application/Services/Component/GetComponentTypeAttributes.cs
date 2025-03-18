@@ -22,7 +22,7 @@ public class GetComponentTypeAttributes(IServiceProvider serviceProvider)
         public List<ComponentTypeAttributeDto> Attributes { get; set; }
     }
     
-    [Cache("ComponentTypeAttributes_{ComponentTypeId}")]
+    //[Cache("ComponentTypeAttributes_{ComponentTypeId}")]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
     {
         var componentType = await uow.Repository<Data.Entities.ComponentType>()

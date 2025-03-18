@@ -18,7 +18,7 @@ public class GetComponentAttributesCached : BaseSvc<GetComponentAttributesCached
     {
     }
 
-    [Cache("GetComponentAttributesCached_{ComponentTypeId}", 600)]
+    //[Cache("GetComponentAttributesCached_{ComponentTypeId}", 600)]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var componentIds = req.ComponentIds;

@@ -25,7 +25,8 @@ public class CreateComponentTypeAttribute(IServiceProvider serviceProvider)
         var newAttribute = new Data.Entities.ComponentTypeAttribute
         {
             Name = request.Name,
-            IsActive = request.IsActive
+            IsActive = request.IsActive,
+            DataType = request.DataType
         };
         
         await uow.Repository<Data.Entities.ComponentTypeAttribute>()

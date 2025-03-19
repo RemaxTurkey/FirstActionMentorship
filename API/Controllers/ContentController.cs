@@ -143,4 +143,12 @@ public class ContentController : ApiControllerBase
         var response = await Svc<SetEmployeeSocialMediaDetails>().InvokeAsync(request);
         return response;
     }
+
+    [HttpPost("employee/photo/upload")]
+    public async Task<SetEmployeePhoto.Response> SetEmployeePhoto([FromForm] SetEmployeePhoto.Request request)
+    {
+        request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString().Replace("::1", "185.49.46.124");
+        var response = await Svc<SetEmployeePhoto>().InvokeAsync(request);
+        return response;
+    }
 }

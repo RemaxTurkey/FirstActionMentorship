@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     #region dbo
 
     public DbSet<Employee> Employees { get; set; }
+    public DbSet<EmployeeRecordHistory> EmployeeRecordHistories { get; set; }
 
     #endregion
 
@@ -54,6 +55,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<EmployeeDescription>()
             .ToTable("EmployeeDescription", "dbo")
+            .Ignore(e => e.IsActive);
+
+        modelBuilder.Entity<EmployeeRecordHistory>()
+            .ToTable("EmployeeRecordHistory", "dbo")
             .Ignore(e => e.IsActive);
 
         base.OnModelCreating(modelBuilder);

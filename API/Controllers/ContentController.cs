@@ -129,4 +129,18 @@ public class ContentController : ApiControllerBase
         var response = await Svc<SetEmployeeVideoLink>().InvokeAsync(request);
         return response;
     }
+
+    [HttpPost("employee/introduction")]
+    public async Task<SetEmployeeIntroduction.Response> SetEmployeeIntroduction([FromBody] SetEmployeeIntroduction.Request request)
+    {
+        var response = await Svc<SetEmployeeIntroduction>().InvokeAsync(request);
+        return response;
+    }
+
+    [HttpPost("employee/social-media-details")]
+    public async Task<SetEmployeeSocialMediaDetails.Response> SetEmployeeSocialMediaDetails([FromBody] SetEmployeeSocialMediaDetails.Request request)
+    {
+        var response = await Svc<SetEmployeeSocialMediaDetails>().InvokeAsync(request);
+        return response;
+    }
 }

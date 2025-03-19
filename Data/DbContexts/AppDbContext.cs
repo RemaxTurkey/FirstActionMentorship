@@ -52,6 +52,10 @@ public class AppDbContext : DbContext
             .ToTable("Employee", "dbo")
             .Ignore(e => e.IsActive);
 
+        modelBuilder.Entity<EmployeeDescription>()
+            .ToTable("EmployeeDescription", "dbo")
+            .Ignore(e => e.IsActive);
+
         base.OnModelCreating(modelBuilder);
     }
     

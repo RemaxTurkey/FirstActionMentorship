@@ -65,7 +65,8 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 ContentId = contentData.ContentComponentAssoc.First().ContentId,
                 ParentId = contentData.ContentComponentAssoc.First().Content.ParentId,
                 Header = contentData.ContentComponentAssoc.First().Content.Header ?? string.Empty,
-                Components = dynamicComponents
+                Components = dynamicComponents,
+                PageType = contentData.ContentComponentAssoc.First().Content.PageType
             }
         };
     }
@@ -78,13 +79,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     {
         var dynamicComponents = new List<dynamic>();
         var componentOrderMap = contentComponentAssoc.ToDictionary(x => x.ComponentId, x => x.Order);
-
-        // content page type menüyse 
-        // menü componentleri olmalı içinde, tüm componentleri kontrol edicez
-        // componentin checkmark-status attribute'u varsa
-        // componentin bağlı olduğu contentcomponentassoc tablosundaki contentid yi alıp
-        // contentemployeerecord tablosunda o employee id için kayıt olup olmadığına bakmak gerek.
-        // kayıt varsa value true olacak döncek
 
         // Her bir component için ayrı ayrı işlem yap
         foreach (var component in components)
@@ -120,19 +114,13 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 
                 if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
-                    var parentId = contentComponentAssoc.First().Content.ParentId;
-                    
-                    if (parentId.HasValue)
-                    {
-                        var complated = await Svc<CheckContentCompletion>()
-                        .InvokeAsync(uow, new CheckContentCompletion.Request(parentId.Value, req.EmployeeId));
+                    var parentId = contentComponentAssoc.First().Content.Id;
 
-                        stringValue = complated.AllContentsCompleted ? "true" : "false";
-                    }
-                    else
-                    {
-                        stringValue = "false";
-                    }
+                    var completed = await Svc<CheckContentCompletion>()
+                    .InvokeAsync(uow, new CheckContentCompletion.Request(parentId, req.EmployeeId));
+
+                    stringValue = completed.AllContentsCompleted ? "true" : "false";
+
                 }
                 else
                 {
@@ -150,7 +138,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 
                 // Menü tipi kontrolleri
                 if (contentComponentAssoc.First().Content.PageType == PageType.Menu && 
-                    attributeName == "checkmark-status")
+                    attributeName == "checkmarkStatus")
                 {
                     // Componentin bağlı olduğu content'i bul
                     var componentContentAssoc = contentComponentAssoc
@@ -260,6 +248,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         public int? ParentId { get; set; }
 
         public dynamic Components { get; set; }
+        public PageType PageType { get; set; }
     }
 
     public class ComponentDetailItemViewModel

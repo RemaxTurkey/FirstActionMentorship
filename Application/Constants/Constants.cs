@@ -7,6 +7,6 @@ namespace Application.Constants
 {
     public static class Constants
     {
-        public static string CheckmarkAttributeName = "checkmark-status";
+        public static string CheckmarkAttributeName = "checkmarkStatus";
     }
 }

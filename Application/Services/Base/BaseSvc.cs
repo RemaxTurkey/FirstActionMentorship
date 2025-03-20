@@ -90,10 +90,10 @@ namespace Application.Services.Base
 
             watch.Stop();
 
-            // Logger?.Log(watch.ElapsedMilliseconds >= 100 ? LogLevel.Information : LogLevel.Debug,
-            //     $">>>> {GetType().Name} Execution Time: {watch.ElapsedMilliseconds} ms.");
+            Logger?.Log(watch.ElapsedMilliseconds >= 100 ? LogLevel.Information : LogLevel.Debug,
+                $">>>> {GetType().Name} Execution Time: {watch.ElapsedMilliseconds} ms.");
 
-            Logger.Log(LogLevel.Debug, $">>>> {GetType().Name} Execution Time: {watch.ElapsedMilliseconds} ms.");
+            // Logger.Log(LogLevel.Debug, $">>>> {GetType().Name} Execution Time: {watch.ElapsedMilliseconds} ms.");
             
             return resp;
         }

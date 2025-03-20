@@ -46,26 +46,18 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
         if (isContent == PageType.Content)
         {
-            var contentEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
-                .FindBy(x => x.ContentId == contentData.ContentComponentAssoc.First().ContentId && x.EmployeeId == req.EmployeeId)
-                .FirstOrDefaultAsync();
-
-            if (contentEmployeeAssoc == null)
-            {
-                contentEmployeeAssoc = new ContentEmployeeAssoc
-                {
-                    ContentId = contentData.ContentComponentAssoc.First().Content.ParentId!.Value,
-                    EmployeeId = req.EmployeeId,
-                    CompletionDate = DateTime.Now,
-                    IsActive = true,
-                    CreatedDate = DateTime.Now
-                };
-
-                await uow.Repository<ContentEmployeeAssoc>().AddAsync(contentEmployeeAssoc);
-                await uow.SaveChangesAsync();
-            }
+            await Svc<AssignContentToEmployee>().InvokeAsync(
+                uow, 
+                new AssignContentToEmployee.Request(
+                    contentData.ContentComponentAssoc.First().ContentId,
+                    contentData.ContentComponentAssoc.First().Content.ParentId!.Value,
+                    req.EmployeeId));
         }
 
+        // content page type menüyse
+        // ContentComponentAssoc tablosunda bu component IsStatic işaretlendiyse
+        // 
+        
         return new Response
         {
             Item = new ContentDetailViewModel
@@ -86,6 +78,13 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     {
         var dynamicComponents = new List<dynamic>();
         var componentOrderMap = contentComponentAssoc.ToDictionary(x => x.ComponentId, x => x.Order);
+
+        // content page type menüyse 
+        // menü componentleri olmalı içinde, tüm componentleri kontrol edicez
+        // componentin checkmark-status attribute'u varsa
+        // componentin bağlı olduğu contentcomponentassoc tablosundaki contentid yi alıp
+        // contentemployeerecord tablosunda o employee id için kayıt olup olmadığına bakmak gerek.
+        // kayıt varsa value true olacak döncek
 
         // Her bir component için ayrı ayrı işlem yap
         foreach (var component in components)
@@ -148,6 +147,32 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 }
                 
                 var typedValue = ConvertToTypedValue(stringValue, attr.DataType);
+                
+                // Menü tipi kontrolleri
+                if (contentComponentAssoc.First().Content.PageType == PageType.Menu && 
+                    attributeName == "checkmark-status")
+                {
+                    // Componentin bağlı olduğu content'i bul
+                    var componentContentAssoc = contentComponentAssoc
+                        .FirstOrDefault(c => c.ComponentId == component.Id);
+                    
+                    if (componentContentAssoc != null)
+                    {
+                        // Bu content için employee kaydı var mı kontrol et
+                        var employeeRecord = await uow.Repository<ContentEmployeeAssoc>()
+                            .FindByNoTracking(c => 
+                                c.ContentId == componentContentAssoc.ContentId && 
+                                c.EmployeeId == req.EmployeeId)
+                            .FirstOrDefaultAsync();
+                        
+                        // Kayıt varsa true olarak işaretle
+                        if (employeeRecord != null)
+                        {
+                            typedValue = true;
+                        }
+                    }
+                }
+                
                 componentExpando[attributeName] = typedValue;
             }
 

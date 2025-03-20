@@ -77,7 +77,7 @@ public class Employee : Entity
     public string GooglePlus { get; set; }
     public string Instagram { get; set; }
     public bool? DeletedPoolShare { get; set; }
-    public short? SiteOrder { get; set; }
+    public byte? SiteOrder { get; set; }
     public string ProfessionalCertificateNumber { get; set; }
     public string DiplomaFile { get; set; }
     public bool? BlackListed { get; set; }
@@ -118,7 +118,7 @@ public class Employee : Entity
     public bool? BlockAutoPropertyApprove { get; set; }
     public DateTime? CriminalFileExpireDate { get; set; }
     public bool? ShowFirstLoginMessage { get; set; }
-    public short? ChildrenCount { get; set; }
+    public byte? ChildrenCount { get; set; }
     public int? ReferenceEmployeeId { get; set; }
     
     public override bool IsActive => true;

@@ -1,6 +1,7 @@
 using API;
 using API.Extensions;
 using API.Filters;
+using Application.Common;
 using Application.Extensions;
 using Application.RedisCache;
 using Data.DbContexts;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddControllers(options => { options.Filters.Add<ApiResponseAttribute>(); });
-
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Logging.ConfigureLogging()
     .ConfigureEntityFrameworkLogging(false, LogLevel.Debug);
 

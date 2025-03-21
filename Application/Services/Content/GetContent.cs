@@ -22,60 +22,65 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var cachedContentResponse = await Svc<GetContentCached>().InvokeAsync(
-            uow, 
+            uow,
             new GetContentCached.Request(req.Id.Value));
-        
+
         var contentData = (
             cachedContentResponse.ContentComponentAssoc,
             cachedContentResponse.Components
         );
 
-        if (contentData.ContentComponentAssoc.Count == 0) 
+        Data.Entities.Content content = null;
+        if (cachedContentResponse.ContentComponentAssoc.Count == 0)
         {
-            throw new BusinessException("Content not found");
+            content = uow.Repository<Data.Entities.Content>().FindByNoTracking(x => x.Id == req.Id).First();
         }
-        
+        else
+        {
+            content = contentData.ContentComponentAssoc.First().Content;
+        }
+
         // Her bir component için ayrı ayrı işlem yapacağımız için, burada genel ComponentTypeId kullanmıyoruz
         var dynamicComponents = await CreateDynamicComponents(
             uow,
             req,
             contentData.Components,
-            contentData.ContentComponentAssoc);
+            contentData.ContentComponentAssoc,
+            content.PageType);
 
-        var isContent = contentData.ContentComponentAssoc.First().Content.PageType;
+        var isContent = content.PageType;
 
         if (isContent == PageType.Content)
         {
             await Svc<AssignContentToEmployee>().InvokeAsync(
-                uow, 
+                uow,
                 new AssignContentToEmployee.Request(
-                    contentData.ContentComponentAssoc.First().ContentId,
-                    contentData.ContentComponentAssoc.First().Content.ParentId!.Value,
+                    content.Id,
+                    content.ParentId!.Value,
                     req.EmployeeId));
         }
 
         // content page type menüyse
         // ContentComponentAssoc tablosunda bu component IsStatic işaretlendiyse
         // 
-        
+
         return new Response
         {
             Item = new ContentDetailViewModel
             {
-                ContentId = contentData.ContentComponentAssoc.First().ContentId,
-                ParentId = contentData.ContentComponentAssoc.First().Content.ParentId,
-                Header = contentData.ContentComponentAssoc.First().Content.Header ?? string.Empty,
-                Components = dynamicComponents,
-                PageType = contentData.ContentComponentAssoc.First().Content.PageType
+                ContentId = content.Id,
+                ParentId = content.ParentId,
+                Header = content.Header ?? string.Empty,
+                PageType = content.PageType,
+                Components = dynamicComponents
             }
         };
     }
 
-    private async Task<List<dynamic>> CreateDynamicComponents(
-        GenericUoW uow,
+    private async Task<List<dynamic>> CreateDynamicComponents(GenericUoW uow,
         Request req,
         List<Data.Entities.Component> components,
-        List<ContentComponentAssoc> contentComponentAssoc)
+        List<ContentComponentAssoc> contentComponentAssoc, PageType contentPageType)
     {
         var dynamicComponents = new List<dynamic>();
         var componentOrderMap = contentComponentAssoc.ToDictionary(x => x.ComponentId, x => x.Order);
@@ -85,91 +90,108 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         {
             // Her component için kendi ComponentTypeId'sini kullan
             var componentTypeId = component.ComponentTypeId;
-            
+
             // Bu component tipi için attribute'ları al
             var typeAttributesResponse = await Svc<GetComponentTypeAttributes>().InvokeAsync(
                 uow, new GetComponentTypeAttributes.Request(componentTypeId));
-            
+
             var componentTypeAttributes = typeAttributesResponse.Attributes;
-            
+
             // Component'in mevcut attribute değerlerini al
             var componentAttributeValues = await uow.Repository<ComponentAttributeValue>()
                 .FindByNoTracking(cav => cav.ComponentId == component.Id && cav.IsActive)
                 .Include(cav => cav.ComponentTypeAttribute)
                 .ToListAsync();
-            
+
             // Component için dynamicObject oluştur
             var componentExpando = new ExpandoObject() as IDictionary<string, object>;
-            
+
             componentExpando["Id"] = component.Id;
             componentExpando["TypeId"] = component.ComponentType?.Id;
             componentExpando["Type"] = component.ComponentType?.Title;
             componentExpando["Order"] = componentOrderMap.GetValueOrDefault(component.Id, 0);
-            
+
             // Her bir attribute için değeri ata
             foreach (var attr in componentTypeAttributes)
             {
                 var attributeName = attr.Name;
                 string stringValue = null;
-                
+
                 if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
-                    var parentId = contentComponentAssoc.First().Content.Id;
+                    if (!component.ContentId.HasValue)
+                    {
+                        stringValue = "false";
+                    }
+                    else
+                    {
+                        var componentinContentininPageType = await uow.Repository<Data.Entities.Content>()
+                            .FindByNoTracking(x => x.Id == component.ContentId)
+                            .Select(x => x.PageType)
+                            .FirstAsync();
 
-                    var completed = await Svc<CheckContentCompletion>()
-                    .InvokeAsync(uow, new CheckContentCompletion.Request(parentId, req.EmployeeId));
-
-                    stringValue = completed.AllContentsCompleted ? "true" : "false";
-
+                        var exist = componentinContentininPageType == PageType.Content
+                            ? await uow.Repository<ContentEmployeeRecord>()
+                                .FindByNoTracking(x =>
+                                    x.ContentId == component.ContentId && x.EmployeeId == req.EmployeeId)
+                                .AnyAsync()
+                            : componentinContentininPageType == PageType.Menu && await uow
+                                .Repository<ContentEmployeeAssoc>()
+                                .FindByNoTracking(x =>
+                                    x.ContentId == component.ContentId && x.EmployeeId == req.EmployeeId)
+                                .AnyAsync()
+                            ;
+                        stringValue = exist ? "true" : "false";
+                    }
                 }
                 else
                 {
                     // ComponentAttributeValue tablosundan doğrudan bu component ve attribute için değeri al
                     var attributeValue = componentAttributeValues
                         .FirstOrDefault(cav => cav.ComponentTypeAttributeId == attr.Id);
-                    
+
                     if (attributeValue != null)
                     {
                         stringValue = attributeValue.Value;
                     }
                 }
-                
+
                 var typedValue = ConvertToTypedValue(stringValue, attr.DataType);
-                
-                // Menü tipi kontrolleri
-                if (contentComponentAssoc.First().Content.PageType == PageType.Menu && 
-                    attributeName == "checkmarkStatus")
-                {
-                    // Componentin bağlı olduğu content'i bul
-                    var componentContentAssoc = contentComponentAssoc
-                        .FirstOrDefault(c => c.ComponentId == component.Id);
-                    
-                    if (componentContentAssoc != null)
-                    {
-                        // Bu content için employee kaydı var mı kontrol et
-                        var employeeRecord = await uow.Repository<ContentEmployeeAssoc>()
-                            .FindByNoTracking(c => 
-                                c.ContentId == componentContentAssoc.ContentId && 
-                                c.EmployeeId == req.EmployeeId)
-                            .FirstOrDefaultAsync();
-                        
-                        // Kayıt varsa true olarak işaretle
-                        if (employeeRecord != null)
-                        {
-                            typedValue = true;
-                        }
-                    }
-                }
-                
+
+                // // Menü tipi kontrolleri
+                // if (contentComponentAssoc.First().Content.PageType == PageType.Menu && 
+                //     attributeName == "checkmarkStatus")
+                // {
+                //     // Componentin bağlı olduğu content'i bul
+                //     var componentContentAssoc = contentComponentAssoc
+                //         .FirstOrDefault(c => c.ComponentId == component.Id);
+                //     
+                //     if (componentContentAssoc != null)
+                //     {
+                //         // Bu content için employee kaydı var mı kontrol et
+                //         var employeeRecord = await uow.Repository<ContentEmployeeAssoc>()
+                //             .FindByNoTracking(c => 
+                //                 c.ContentId == componentContentAssoc.ContentId && 
+                //                 c.EmployeeId == req.EmployeeId)
+                //             .FirstOrDefaultAsync();
+                //         
+                //         // Kayıt varsa true olarak işaretle
+                //         if (employeeRecord != null)
+                //         {
+                //             typedValue = true;
+                //         }
+                //     }
+                // }
+
                 componentExpando[attributeName] = typedValue;
             }
 
             dynamicComponents.Add(componentExpando);
         }
-        
+
         return dynamicComponents;
     }
-    
+
     private object ConvertToTypedValue(string value, Data.Entities.AttributeDataType dataType)
     {
         if (string.IsNullOrEmpty(value))
@@ -179,19 +201,19 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 Logger?.Log(LogLevel.Debug, "Boolean type with empty value, returning FALSE");
                 return false;
             }
-            
+
             var result = dataType switch
             {
                 AttributeDataType.String => string.Empty,
                 AttributeDataType.Integer => null,
-                AttributeDataType.Decimal => null, 
+                AttributeDataType.Decimal => null,
                 AttributeDataType.DateTime => null,
                 _ => null
             };
 
             return result;
         }
-            
+
         try
         {
             switch (dataType)
@@ -201,16 +223,19 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
                 case AttributeDataType.String:
                     return value;
-                    
+
                 case AttributeDataType.Integer:
                     return int.TryParse(value, out var intResult) ? intResult : null;
-                    
+
                 case AttributeDataType.Decimal:
-                    return decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var decimalResult) ? decimalResult : null;
-                    
+                    return decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture,
+                        out var decimalResult)
+                        ? decimalResult
+                        : null;
+
                 case AttributeDataType.DateTime:
                     return DateTime.TryParse(value, out var dateResult) ? dateResult : null;
-                    
+
                 default:
                     return value;
             }
@@ -218,10 +243,10 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         catch (Exception ex)
         {
             Logger?.Log(LogLevel.Warning, $"Error converting value '{value}' to {dataType}: {ex.Message}");
-            
+
             if (dataType == AttributeDataType.Boolean)
                 return false;
-                
+
             return dataType switch
             {
                 AttributeDataType.String => string.Empty,

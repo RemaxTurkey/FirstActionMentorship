@@ -34,6 +34,7 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
                     ContentId = req.SaveContentId,
                     CompletionDate = DateTime.Now,
                     ContentEmployeeAssocId = contentEmployeeAssoc.Id,
+                    EmployeeId = req.EmployeeId,
                     IsActive = true
                 };
 

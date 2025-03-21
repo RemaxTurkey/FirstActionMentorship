@@ -16,7 +16,7 @@ public class AssignContentToEmployee : BaseSvc<AssignContentToEmployee.Request, 
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var contentEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
-            .FindBy(x => x.ContentId == req.ContentId && x.EmployeeId == req.EmployeeId)
+            .FindBy(x => x.ContentId == req.ParentId && x.EmployeeId == req.EmployeeId)
             .FirstOrDefaultAsync();
 
         if (contentEmployeeAssoc == null)

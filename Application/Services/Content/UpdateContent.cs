@@ -8,6 +8,8 @@ using Application.UnitOfWorks;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore;
+using Application.RedisCache;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Content;
 
@@ -30,12 +32,16 @@ public class UpdateContent : BaseSvc<UpdateContent.Request, UpdateContent.Respon
             throw new BusinessException($"Content with ID {req.Id} not found");
         }
 
+        var oldPageType = content.PageType;
+        
         content.Header = req.Header;
         content.ParentId = req.ParentId;
         content.PageType = req.PageType;
 
         uow.Repository<Data.Entities.Content>().Update(content);
         await uow.SaveChangesAsync();
+
+        await InvalidateContentCache(content.Id);
 
         var existingContentComponents = await uow.Repository<ContentComponentAssoc>()
             .FindBy(cca => cca.ContentId == content.Id && cca.IsActive)
@@ -198,6 +204,20 @@ public class UpdateContent : BaseSvc<UpdateContent.Request, UpdateContent.Respon
         if (request.Components is null)
         {
             throw new BusinessException("Components are required");
+        }
+    }
+
+    private async Task InvalidateContentCache(int contentId)
+    {
+        if (CacheManager != null)
+        {
+            var pageTypeCacheKey = $"GetContentPageType_{contentId}";
+            await CacheManager.RemoveAsync(pageTypeCacheKey);
+            
+            var contentCachedKey = $"GetContentCached_{contentId}";
+            await CacheManager.RemoveAsync(contentCachedKey);
+            
+            Logger?.Log(LogLevel.Debug, $"Content ID {contentId} için cache temizlendi");
         }
     }
 

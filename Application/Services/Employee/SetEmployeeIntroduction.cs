@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Application.Services.Base;
 using Application.UnitOfWorks;
@@ -21,11 +22,24 @@ namespace Application.Services.Employee
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employeeDescription = await uow.Repository<EmployeeDescription>()
-            .GetAsync(e => e.EmployeeId == req.EmployeeId);
+            .GetAsync(e => e.EmployeeId == req.EmployeeId 
+                           && e.LanguageId == 1
+                           && e.Active == true);
 
             if (employeeDescription == null)
             {
-                employeeDescription = new EmployeeDescription();
+                employeeDescription = new EmployeeDescription
+                {
+                    Introduction = req.Introduction,
+                    EmployeeId = req.EmployeeId,
+                    LanguageId = 1,
+                    Active = true
+                };
+
+                await uow.Repository<EmployeeDescription>().AddAsync(employeeDescription);
+                await uow.SaveChangesAsync();
+
+                return new Response();
             }
 
             employeeDescription.Introduction = req.Introduction;

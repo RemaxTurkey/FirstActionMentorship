@@ -25,7 +25,8 @@ namespace Application.Services.Employee
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employeeDescription = await uow.Repository<EmployeeDescription>()
-                .GetAsync(e => e.EmployeeId == req.EmployeeId);
+                .GetAsync(e => e.EmployeeId == req.EmployeeId 
+                               && e.Active == true && e.LanguageId == 1);
 
             if (employeeDescription == null)
             {

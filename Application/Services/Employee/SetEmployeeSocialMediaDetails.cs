@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Base;
 using Application.UnitOfWorks;
-using Data.Entities.dbo;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Application.Services.Employee
@@ -20,24 +20,36 @@ namespace Application.Services.Employee
 
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
-            var employee = await uow.Repository<Data.Entities.dbo.Employee>().GetByIdAsync(req.EmployeeId);
-
-            if (employee == null)
+            // Employee var olup olmadığını kontrol etmek için basit bir sorgu
+            string checkSql = "SELECT COUNT(1) FROM [dbo].[Employee] WHERE [Id] = @p0";
+            var count = await uow.DbContext.Database.ExecuteSqlRawAsync(checkSql, req.EmployeeId);
+            
+            if (count == 0)
             {
                 throw new Exception("Employee not found");
             }
 
-            employee.Facebook = req.Facebook;
-            employee.Whatsapp = req.Whatsapp;
-            employee.Twitter = req.Twitter;
-            employee.Linkedin = req.LinkedIn;
-            employee.Instagram = req.Instagram;
-            employee.Website = req.Website;
-            employee.Blogger = req.Blogger;
- 
-            uow.Repository<Data.Entities.dbo.Employee>().Update(employee);
-            await uow.SaveChangesAsync();
-
+            // Sosyal medya detaylarını güncellemek için SQL sorgusu
+            string sql = @"UPDATE [dbo].[Employee] 
+                          SET [Facebook] = @p0,
+                              [Whatsapp] = @p1,
+                              [Twitter] = @p2,
+                              [Linkedin] = @p3,
+                              [Instagram] = @p4,
+                              [Website] = @p5,
+                              [Blogger] = @p6
+                          WHERE [Id] = @p7";
+            
+            await uow.DbContext.Database.ExecuteSqlRawAsync(sql, 
+                req.Facebook, 
+                req.Whatsapp, 
+                req.Twitter, 
+                req.LinkedIn, 
+                req.Instagram, 
+                req.Website, 
+                req.Blogger, 
+                req.EmployeeId);
+            
             return new Response();
         }
     }

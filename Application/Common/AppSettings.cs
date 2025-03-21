@@ -8,5 +8,6 @@ namespace Application.Common
     public class AppSettings
     {
         public string PhotoUploadPath { get; set; }
+        public string PhotoUploadUrl { get; set; }
     }
 }

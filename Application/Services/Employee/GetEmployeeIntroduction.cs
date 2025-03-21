@@ -1,0 +1,44 @@
+using System;
+using System.Threading.Tasks;
+using Application.Services.Base;
+using Application.UnitOfWorks;
+using Data.Entities.dbo;
+
+namespace Application.Services.Employee
+{
+    public class GetEmployeeIntroduction : BaseSvc<GetEmployeeIntroduction.Request, GetEmployeeIntroduction.Response>
+    {
+        public record Request
+        {
+            public int EmployeeId { get; set; }
+        }
+
+        public record Response
+        {
+            public string Introduction { get; set; }
+        }
+
+        public GetEmployeeIntroduction(IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+        }
+
+        protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
+        {
+            var employeeDescription = await uow.Repository<EmployeeDescription>()
+                .GetAsync(e => e.EmployeeId == req.EmployeeId);
+
+            if (employeeDescription == null)
+            {
+                return new Response
+                {
+                    Introduction = string.Empty
+                };
+            }
+
+            return new Response
+            {
+                Introduction = employeeDescription.Introduction ?? string.Empty
+            };
+        }
+    }
+} 

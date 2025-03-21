@@ -130,10 +130,26 @@ public class ContentController : ApiControllerBase
         return response;
     }
 
+    [HttpGet("employee/video/{EmployeeId}")]
+    public async Task<GetEmployeeVideoLink.Response> GetEmployeeVideoLink([FromRoute] int EmployeeId)
+    {
+        var request = new GetEmployeeVideoLink.Request { EmployeeId = EmployeeId };
+        var response = await Svc<GetEmployeeVideoLink>().InvokeNoTrackingAsync(request);
+        return response;
+    }
+
     [HttpPost("employee/introduction")]
     public async Task<SetEmployeeIntroduction.Response> SetEmployeeIntroduction([FromBody] SetEmployeeIntroduction.Request request)
     {
         var response = await Svc<SetEmployeeIntroduction>().InvokeAsync(request);
+        return response;
+    }
+
+    [HttpGet("employee/introduction/{EmployeeId}")]
+    public async Task<GetEmployeeIntroduction.Response> GetEmployeeIntroduction([FromRoute] int EmployeeId)
+    {
+        var request = new GetEmployeeIntroduction.Request { EmployeeId = EmployeeId };
+        var response = await Svc<GetEmployeeIntroduction>().InvokeNoTrackingAsync(request);
         return response;
     }
 
@@ -144,11 +160,27 @@ public class ContentController : ApiControllerBase
         return response;
     }
 
+    [HttpGet("employee/social-media-details/{EmployeeId}")]
+    public async Task<GetEmployeeSocialMediaDetails.Response> GetEmployeeSocialMediaDetails([FromRoute] int EmployeeId)
+    {
+        var request = new GetEmployeeSocialMediaDetails.Request { EmployeeId = EmployeeId };
+        var response = await Svc<GetEmployeeSocialMediaDetails>().InvokeNoTrackingAsync(request);
+        return response;
+    }
+
     [HttpPost("employee/photo/upload")]
     public async Task<SetEmployeePhoto.Response> SetEmployeePhoto([FromForm] SetEmployeePhoto.Request request)
     {
         request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString().Replace("::1", "185.49.46.124");
         var response = await Svc<SetEmployeePhoto>().InvokeAsync(request);
+        return response;
+    }
+
+    [HttpGet("employee/photo/{EmployeeId}")]
+    public async Task<GetEmployeePhoto.Response> GetEmployeePhoto([FromRoute] int EmployeeId)
+    {
+        var request = new GetEmployeePhoto.Request { EmployeeId = EmployeeId };
+        var response = await Svc<GetEmployeePhoto>().InvokeNoTrackingAsync(request);
         return response;
     }
 }

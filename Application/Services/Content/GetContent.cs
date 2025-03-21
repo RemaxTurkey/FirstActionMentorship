@@ -6,6 +6,7 @@ using Application.Exceptions;
 using Application.Services.Base;
 using Application.Services.Component;
 using Application.Services.ComponentTypeAttribute.DTOs;
+using Application.Services.Employee;
 using Application.UnitOfWorks;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -111,7 +112,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             componentExpando["Type"] = component.ComponentType?.Title;
             componentExpando["Order"] = componentOrderMap.GetValueOrDefault(component.Id, 0);
 
-            // Her bir attribute için değeri ata
             foreach (var attr in componentTypeAttributes)
             {
                 var attributeName = attr.Name;
@@ -119,34 +119,10 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
                 if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
-                    if (!component.ContentId.HasValue)
-                    {
-                        stringValue = "false";
-                    }
-                    else
-                    {
-                        var componentinContentininPageType = await uow.Repository<Data.Entities.Content>()
-                            .FindByNoTracking(x => x.Id == component.ContentId)
-                            .Select(x => x.PageType)
-                            .FirstAsync();
-
-                        var exist = componentinContentininPageType == PageType.Content
-                            ? await uow.Repository<ContentEmployeeRecord>()
-                                .FindByNoTracking(x =>
-                                    x.ContentId == component.ContentId && x.EmployeeId == req.EmployeeId)
-                                .AnyAsync()
-                            : componentinContentininPageType == PageType.Menu && await uow
-                                .Repository<ContentEmployeeAssoc>()
-                                .FindByNoTracking(x =>
-                                    x.ContentId == component.ContentId && x.EmployeeId == req.EmployeeId)
-                                .AnyAsync()
-                            ;
-                        stringValue = exist ? "true" : "false";
-                    }
+                    stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);
                 }
                 else
                 {
-                    // ComponentAttributeValue tablosundan doğrudan bu component ve attribute için değeri al
                     var attributeValue = componentAttributeValues
                         .FirstOrDefault(cav => cav.ComponentTypeAttributeId == attr.Id);
 
@@ -157,32 +133,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 }
 
                 var typedValue = ConvertToTypedValue(stringValue, attr.DataType);
-
-                // // Menü tipi kontrolleri
-                // if (contentComponentAssoc.First().Content.PageType == PageType.Menu && 
-                //     attributeName == "checkmarkStatus")
-                // {
-                //     // Componentin bağlı olduğu content'i bul
-                //     var componentContentAssoc = contentComponentAssoc
-                //         .FirstOrDefault(c => c.ComponentId == component.Id);
-                //     
-                //     if (componentContentAssoc != null)
-                //     {
-                //         // Bu content için employee kaydı var mı kontrol et
-                //         var employeeRecord = await uow.Repository<ContentEmployeeAssoc>()
-                //             .FindByNoTracking(c => 
-                //                 c.ContentId == componentContentAssoc.ContentId && 
-                //                 c.EmployeeId == req.EmployeeId)
-                //             .FirstOrDefaultAsync();
-                //         
-                //         // Kayıt varsa true olarak işaretle
-                //         if (employeeRecord != null)
-                //         {
-                //             typedValue = true;
-                //         }
-                //     }
-                // }
-
                 componentExpando[attributeName] = typedValue;
             }
 
@@ -190,6 +140,27 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         }
 
         return dynamicComponents;
+    }
+
+    private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
+    {
+        if (!component.ContentId.HasValue)
+        {
+            return "false";
+        }
+
+        var contentPageTypeResponse = await Svc<GetContentPageType>().InvokeAsync(
+            uow, 
+            new GetContentPageType.Request(component.ContentId.Value));
+
+        var employeeAssocResponse = await Svc<CheckEmployeeContentAssociation>().InvokeAsync(
+            uow,
+            new CheckEmployeeContentAssociation.Request(
+                component.ContentId.Value,
+                employeeId,
+                contentPageTypeResponse.PageType));
+
+        return employeeAssocResponse.Exists ? "true" : "false";
     }
 
     private object ConvertToTypedValue(string value, Data.Entities.AttributeDataType dataType)

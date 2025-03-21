@@ -16,7 +16,7 @@ public class GetContentCached : BaseSvc<GetContentCached.Request, GetContentCach
     {
     }
 
-    //[Cache("GetContentCached_{ContentId}", 300)]
+    [Cache("GetContentCached_{ContentId}", 300)]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var contentData = await GetContentDataInternalAsync(uow, req.ContentId);

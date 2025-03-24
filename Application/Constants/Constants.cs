@@ -10,5 +10,7 @@ namespace Application.Constants
         public static string CheckmarkAttributeName = "checkmarkStatus";
         public static string LockStatusAttributeName = "lockStatus";
         public static int ContentHazirlikId = 5;
+        public static int ImageSliderComponentTypeId = 6;
+        public static int ButtonGroupComponentTypeId = 9;
     }
 }

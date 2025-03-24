@@ -46,20 +46,6 @@ public class CreateComponent(IServiceProvider serviceProvider)
             .AddAsync(newComponent);
         await uow.SaveChangesAsync();
         
-        if (request.Items != null && request.Items.Any())
-        {
-            foreach (var itemDto in request.Items)
-            {
-                await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
-                {
-                    ComponentId = newComponent.Id,
-                    ComponentTypeId = request.ComponentTypeId,
-                    Item = itemDto,
-                    IsActive = request.IsActive
-                });
-            }
-        }
-        
         if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Count != 0)
         {
             foreach (var attrDto in request.ComponentTypeAttributeValues)
@@ -81,17 +67,6 @@ public class CreateComponent(IServiceProvider serviceProvider)
 
     private static void ValidateComponent(Request request, List<int> validAttributeIds)
     {
-        if (request.Items != null && request.Items.Any())
-        {
-            foreach (var item in request.Items)
-            {
-                if (!validAttributeIds.Contains(item.AttributeId))
-                {
-                    throw new BusinessException($"Attribute with ID {item.AttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-                }
-            }
-        }
-
         if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
         {
             foreach (var attr in request.ComponentTypeAttributeValues)

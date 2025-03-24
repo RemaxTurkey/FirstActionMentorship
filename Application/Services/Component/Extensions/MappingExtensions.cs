@@ -15,13 +15,6 @@ public static partial class MappingExtensions
             Type = component.ComponentType?.ToDto(),
             IsActive = component.IsActive,
             Order = order,
-            Items = component.ComponentItems?
-                .Select(item => new ComponentItemDto
-                {
-                    AttributeId = item.ComponentTypeAttributeId,
-                    Value = item.Value
-                })
-                .ToList(),
             ComponentTypeAttributeValues = component.ComponentAttributeValue?
                 .Select(attr => new ComponentTypeAttributeValueDto
                 {

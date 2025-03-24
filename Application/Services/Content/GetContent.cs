@@ -121,6 +121,30 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 {
                     stringValue = await GetLockStatusAttributeValue(uow, component, req.EmployeeId);
                 }
+                else if (attr.Id == Constants.Constants.ImageSliderComponentTypeId)
+                {
+                    stringValue = component.ImageUrls;
+                    
+                    // ImageSlider için özel işlem: virgülle ayrılmış URL'leri diziye çevir
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        // Virgülle ayrılmış URL'leri diziye çevir
+                        var imageUrls = stringValue.Split(',')
+                            .Select(url => url.Trim())
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToArray();
+                            
+                        // Sabit "imageUrls" key'i ile componentExpando'ya ekle
+                        componentExpando["imageUrls"] = imageUrls;
+                        
+                        // Bu özel durumda ConvertToTypedValue çağrısını atla
+                        continue;
+                    }
+                }
+                else if (attr.Id == Constants.Constants.ButtonGroupComponentTypeId)
+                {
+
+                }
                 else
                 {
                     var attributeValue = componentAttributeValues

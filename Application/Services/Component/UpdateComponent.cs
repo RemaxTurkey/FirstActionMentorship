@@ -57,47 +57,6 @@ public class UpdateComponent(IServiceProvider serviceProvider)
         uow.Repository<Data.Entities.Component>().Update(component);
         await uow.SaveChangesAsync();
         
-        if (request.Items != null && request.Items.Any())
-        {
-            var existingItems = await uow.Repository<ComponentItem>()
-                .FindBy(ci => ci.ComponentId == component.Id && ci.IsActive)
-                .ToListAsync();
-            
-            foreach (var existingItem in existingItems)
-            {
-                existingItem.IsActive = false;
-                uow.Repository<ComponentItem>().Update(existingItem);
-            }
-            
-            foreach (var itemDto in request.Items)
-            {
-                if (!validAttributeIds.Contains(itemDto.AttributeId))
-                {
-                    throw new BusinessException($"Attribute with ID {itemDto.AttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-                }
-                
-                var existingItem = existingItems.FirstOrDefault(i => 
-                    i.ComponentTypeAttributeId == itemDto.AttributeId);
-                
-                if (existingItem != null)
-                {
-                    existingItem.Value = itemDto.Value;
-                    existingItem.IsActive = true;
-                    uow.Repository<ComponentItem>().Update(existingItem);
-                }
-                else
-                {
-                    await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
-                    {
-                        ComponentId = component.Id,
-                        ComponentTypeId = request.ComponentTypeId,
-                        Item = itemDto,
-                        IsActive = true
-                    });
-                }
-            }
-        }
-        
         if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
         {
             var existingAttributeValues = await uow.Repository<ComponentAttributeValue>()

@@ -101,20 +101,6 @@ public class ContentController : ApiControllerBase
                         });
                     }
                 }
-                
-                // Mevcut Item'ları ekle
-                if (componentDetail.Items != null)
-                {
-                    foreach (var item in componentDetail.Items)
-                    {
-                        componentDto.Items.Add(new UpdateContent.UpdateComponentItemDto
-                        {
-                            Id = null, // Item ID'sini burada belirleyemiyoruz
-                            AttributeId = item.AttributeId,
-                            Value = item.Value
-                        });
-                    }
-                }
 
                 updateRequest.Components.Add(componentDto);
             }

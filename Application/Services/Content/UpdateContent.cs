@@ -131,44 +131,6 @@ public class UpdateContent : BaseSvc<UpdateContent.Request, UpdateContent.Respon
                     }
                 });
             }
-
-            if (componentDto.Id.HasValue && componentDto.Items != null)
-            {
-                var existingItems = await uow.Repository<ComponentItem>()
-                    .FindBy(ci => ci.ComponentId == componentId && ci.IsActive)
-                    .ToListAsync();
-
-                foreach (var existingItem in existingItems)
-                {
-                    var updatedItem = componentDto.Items
-                        .FirstOrDefault(i => i.Id.HasValue && i.Id.Value == existingItem.Id);
-
-                    if (updatedItem != null)
-                    {
-                        existingItem.Value = updatedItem.Value;
-                        uow.Repository<ComponentItem>().Update(existingItem);
-                    }
-                    else
-                    {
-                        existingItem.IsActive = false;
-                        uow.Repository<ComponentItem>().Update(existingItem);
-                    }
-                }
-            }
-
-            if (componentDto.Items != null)
-            {
-                foreach (var item in componentDto.Items.Where(i => !i.Id.HasValue))
-                {
-                    await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
-                    {
-                        ComponentId = componentId,
-                        ComponentTypeId = componentDto.ComponentTypeId,
-                        Item = item,
-                        IsActive = true
-                    });
-                }
-            }
         }
 
         var componentIdsInRequest = req.Components

@@ -58,21 +58,6 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
                     }
                 });
             }
-
-            if (component.Items != null && component.Items.Count > 0)
-            {
-                foreach (var item in component.Items)
-                {
-                    await Svc<AddComponentItem>().InvokeAsync(uow, new AddComponentItem.Request
-                    {
-                        ComponentId = contentComponentAssoc.ComponentId,
-                        ComponentTypeId = component.ComponentTypeId,
-                        Item = item,
-                        IsActive = true
-                    });
-                }
-            }
-        
         }
         
         await uow.SaveChangesAsync();

@@ -47,6 +47,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ContentEmployeeAssoc>().ToTable("ContentEmployeeAssoc", "fam");
         modelBuilder.Entity<ContentEmployeeRecord>().ToTable("ContentEmployeeRecord", "fam");
         modelBuilder.Entity<ContentComponentAssoc>().ToTable("ContentComponentAssoc", "fam");
+        modelBuilder.Entity<EmployeeAcceptance>().ToTable("EmployeeAcceptance", "fam");
 
         // [dbo]
         modelBuilder.Entity<Employee>()

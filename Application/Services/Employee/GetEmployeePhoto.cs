@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Application.Attributes;
 using Application.Common;
 using Application.Services.Base;
 using Application.UnitOfWorks;
@@ -27,6 +28,7 @@ namespace Application.Services.Employee
             _appSettings = appSettings;
         }
 
+        [Cache("GetEmployeePhoto_{EmployeeId}", 3600)]
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employee = await uow.Repository<Data.Entities.dbo.Employee>().GetByIdAsync(req.EmployeeId);

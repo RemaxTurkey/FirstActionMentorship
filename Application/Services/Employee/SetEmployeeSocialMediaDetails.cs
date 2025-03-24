@@ -49,8 +49,15 @@ namespace Application.Services.Employee
                 req.Website, 
                 req.Blogger, 
                 req.EmployeeId);
+
+            await RemoveCache(req.EmployeeId);
             
             return new Response();
+        }
+
+        public async Task RemoveCache(int employeeId)
+        {
+            await CacheManager.RemoveAsync("GetEmployeeSocialMediaDetails_" + employeeId);
         }
     }
 }

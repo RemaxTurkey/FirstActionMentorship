@@ -90,7 +90,14 @@ public class SetEmployeePhoto : BaseSvc<SetEmployeePhoto.Request, SetEmployeePho
         });
     
         await uow.SaveChangesAsync();
+
+        await RemoveCache(req.EmployeeId);
         return new Response(req.EmployeeId);
+    }
+
+    public async Task RemoveCache(int employeeId)
+    {
+        await CacheManager.RemoveAsync("GetEmployeePhoto_" + employeeId);
     }
 
     public record Request(int EmployeeId, IFormFile Image)

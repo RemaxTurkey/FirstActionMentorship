@@ -39,6 +39,8 @@ namespace Application.Services.Employee
                 await uow.Repository<EmployeeDescription>().AddAsync(employeeDescription);
                 await uow.SaveChangesAsync();
 
+                await RemoveCache(req.EmployeeId);
+
                 return new Response();
             }
 
@@ -47,7 +49,14 @@ namespace Application.Services.Employee
             uow.Repository<EmployeeDescription>().Update(employeeDescription);
             await uow.SaveChangesAsync();
             
+            await RemoveCache(req.EmployeeId);
+
             return new Response();
+        }
+
+        public async Task RemoveCache(int employeeId)
+        {
+            await CacheManager.RemoveAsync("GetEmployeeIntroduction_" + employeeId);
         }
     }
 }

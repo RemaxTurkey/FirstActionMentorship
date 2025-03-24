@@ -16,7 +16,7 @@ public class
     {
     }
 
-    [Cache("CheckEmployeeContentAssociation_{ContentId}_{EmployeeId}_{PageType}", 600)]
+    // [Cache("CheckEmployeeContentAssociation_{ContentId}_{EmployeeId}_{PageType}", 600)]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         bool exists = false;

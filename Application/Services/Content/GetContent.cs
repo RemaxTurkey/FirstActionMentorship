@@ -61,10 +61,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                     req.EmployeeId));
         }
 
-        // content page type menüyse
-        // ContentComponentAssoc tablosunda bu component IsStatic işaretlendiyse
-        // 
-
         return new Response
         {
             Item = new ContentDetailViewModel
@@ -121,6 +117,10 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 {
                     stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);
                 }
+                else if (attributeName == Constants.Constants.LockStatusAttributeName)
+                {
+                    stringValue = await GetLockStatusAttributeValue(uow, component, req.EmployeeId);
+                }
                 else
                 {
                     var attributeValue = componentAttributeValues
@@ -141,6 +141,28 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
         return dynamicComponents;
     }
+
+    private async Task<string> GetLockStatusAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
+    {
+        var contentIsHazirlik = await uow.Repository<Data.Entities.Content>()
+            .FindByNoTracking(c => c.Id == component.ContentId.Value)
+            .FirstOrDefaultAsync();
+
+        // hazırlık id=2. content hazırlık altındaki bir menü ise kontrol gerektiği için kontrol ekledim.
+        if (contentIsHazirlik == null && contentIsHazirlik.Id != Constants.Constants.ContentHazirlikId)
+        {
+            return "false";
+        }
+
+        // ContentEmployeeAssoc'ta bu employee için bu content'in hazırlık tamamlandı kaydı varsa lockStatus false, yoksa true dönmeli.
+        var contentIsHazirlikEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
+            .FindByNoTracking(c => c.ContentId == Constants.Constants.ContentHazirlikId && c.EmployeeId == employeeId)
+            .AnyAsync();
+
+        return contentIsHazirlikEmployeeAssoc ? "false" : "true";
+    }
+
+
 
     private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
     {

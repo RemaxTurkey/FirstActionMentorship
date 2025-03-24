@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Application.Attributes;
 using Application.Services.Base;
 using Application.UnitOfWorks;
 
@@ -21,6 +22,7 @@ public class GetEmployeeVideoLink : BaseSvc<GetEmployeeVideoLink.Request, GetEmp
     {
     }
 
+    [Cache("GetEmployeeVideoLink_{EmployeeId}", 3600)]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var employee = await uow.Repository<Data.Entities.dbo.Employee>().GetByIdAsync(req.EmployeeId);

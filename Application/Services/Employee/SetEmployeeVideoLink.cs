@@ -18,7 +18,12 @@ public class SetEmployeeVideoLink : BaseSvc<SetEmployeeVideoLink.Request, SetEmp
     {
         string sql = "UPDATE [dbo].[Employee] SET [Video] = @p0 WHERE [Id] = @p1";
         await uow.DbContext.Database.ExecuteSqlRawAsync(sql, req.VideoLink, req.EmployeeId);
-        
+        await RemoveCache(req.EmployeeId);
         return new Response();
+    }
+
+    public async Task RemoveCache(int employeeId)
+    {
+        await CacheManager.RemoveAsync("GetEmployeeVideoLink_" + employeeId);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Application.Attributes;
 using Application.Services.Base;
 using Application.UnitOfWorks;
 using Data.Entities.dbo;
@@ -22,6 +23,7 @@ namespace Application.Services.Employee
         {
         }
 
+        [Cache("GetEmployeeIntroduction_{EmployeeId}", 3600)]
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employeeDescription = await uow.Repository<EmployeeDescription>()

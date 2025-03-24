@@ -24,14 +24,7 @@ public class GetComponentTypeAttributes(IServiceProvider serviceProvider)
     
     //[Cache("ComponentTypeAttributes_{ComponentTypeId}")]
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
-    {
-        var componentType = await uow.Repository<Data.Entities.ComponentType>()
-            .GetByIdAsync(request.ComponentTypeId);
-        
-        if (componentType == null)
-            throw new BusinessException($"ComponentType with ID {request.ComponentTypeId} not found.");
-        
-        // TODO: bura include ile ComponentTypeAttribute direk alınabilir.
+    {        
         var attributeAssoc = await uow.Repository<Data.Entities.ComponentTypeAttributeAssoc>()
             .FindByNoTracking(a => a.ComponentTypeId == request.ComponentTypeId)
             .ToListAsync();

@@ -55,13 +55,9 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
             }
         }
 
-        var nextContent = await Svc<GetContent>().InvokeAsync(
-            uow,
-            new GetContent.Request(req.NextContentId, req.EmployeeId));
-
         return new Response
         {
-            Item = nextContent.Item
+            Item = true
         };
     }
 
@@ -69,6 +65,6 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
 
     public class Response
     {
-        public GetContent.ContentDetailViewModel Item { get; set; }
+        public bool Item { get; set; }
     }
 } 

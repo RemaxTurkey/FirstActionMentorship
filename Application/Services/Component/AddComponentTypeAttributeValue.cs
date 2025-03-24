@@ -16,19 +16,14 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
         public ComponentTypeAttributeValueDto AttributeValue { get; set; }
         public bool IsActive { get; set; } = true;
     }
-    
+
     public class Response
     {
         public bool Success { get; set; }
     }
-    
+
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request request)
     {
-        var component = await uow.Repository<Data.Entities.Component>()
-            .GetByIdAsync(request.ComponentId);
-
-        await ValidateComponentTypeRules(uow, request, component);
-
         var existingAttribute = await uow.Repository<Data.Entities.ComponentAttributeValue>()
             .GetAsync(a =>
                 a.ComponentId == request.ComponentId &&
@@ -57,12 +52,4 @@ public class AddComponentTypeAttributeValue(IServiceProvider serviceProvider)
 
         return new Response { Success = true };
     }
-
-    private static async Task ValidateComponentTypeRules(GenericUoW uow, Request request, Data.Entities.Component component)
-    {
-        if (component == null)
-            {
-                throw new BusinessException($"Component with ID {request.ComponentId} not found.");
-            }
-    }
-} 
+}

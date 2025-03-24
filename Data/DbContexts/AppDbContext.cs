@@ -39,7 +39,7 @@ public class AppDbContext : DbContext
         // [fam]
         modelBuilder.Entity<Component>().ToTable("Component", "fam");
         modelBuilder.Entity<ComponentAttributeValue>().ToTable("ComponentAttributeValue", "fam");
-        modelBuilder.Entity<ComponentItem>().ToTable("ComponentItem", "fam");
+        modelBuilder.Entity<ButtonGroupDetail>().ToTable("ButtonGroupDetail", "fam");
         modelBuilder.Entity<ComponentType>().ToTable("ComponentType", "fam");
         modelBuilder.Entity<ComponentTypeAttribute>().ToTable("ComponentTypeAttribute", "fam");
         modelBuilder.Entity<ComponentTypeAttributeAssoc>().ToTable("ComponentTypeAttributeAssoc", "fam");
@@ -73,7 +73,7 @@ public class AppDbContext : DbContext
     #region fam
 
     public DbSet<Component> Components { get; set; }
-    public DbSet<ComponentItem> ComponentItems { get; set; }
+    public DbSet<ButtonGroupDetail> ButtonGroupDetail { get; set; }
     public DbSet<ComponentType> ComponentTypes { get; set; }
     public DbSet<ComponentTypeAttribute> ComponentTypeAttributes { get; set; }
     public DbSet<ComponentTypeAttributeAssoc> ComponentTypeAttributeAssocs { get; set; }

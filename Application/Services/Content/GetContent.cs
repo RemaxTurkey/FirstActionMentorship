@@ -119,31 +119,55 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 }
                 else if (attributeName == Constants.Constants.LockStatusAttributeName)
                 {
-                    stringValue = await GetLockStatusAttributeValue(uow, component, req.EmployeeId);
+                    stringValue = await GetLockStatusAttributeValue(uow, component, req.EmployeeId, req.Id);
                 }
                 else if (attr.Id == Constants.Constants.ImageSliderComponentTypeId)
                 {
                     stringValue = component.ImageUrls;
                     
-                    // ImageSlider için özel işlem: virgülle ayrılmış URL'leri diziye çevir
                     if (!string.IsNullOrEmpty(stringValue))
                     {
-                        // Virgülle ayrılmış URL'leri diziye çevir
                         var imageUrls = stringValue.Split(',')
                             .Select(url => url.Trim())
                             .Where(url => !string.IsNullOrWhiteSpace(url))
                             .ToArray();
                             
-                        // Sabit "imageUrls" key'i ile componentExpando'ya ekle
                         componentExpando["imageUrls"] = imageUrls;
                         
-                        // Bu özel durumda ConvertToTypedValue çağrısını atla
                         continue;
                     }
                 }
                 else if (attr.Id == Constants.Constants.ButtonGroupComponentTypeId)
                 {
+                    var componentItems = await uow.Repository<ButtonGroupDetail>()
+                        .FindByNoTracking(x => x.ComponentId == component.Id)
+                        .ToListAsync();
 
+                    if (componentItems.Any())
+                    {
+                        var buttons = new List<IDictionary<string, object>>();
+                        
+                        foreach (var item in componentItems)
+                        {
+                            var buttonObj = new ExpandoObject() as IDictionary<string, object>;
+                            
+                            if (!string.IsNullOrEmpty(item.Icon))
+                                buttonObj["icon"] = item.Icon;
+                            
+                            if (!string.IsNullOrEmpty(item.RedirectUrl))
+                                buttonObj["redirectUrl"] = item.RedirectUrl;
+                            
+                            if (!string.IsNullOrEmpty(item.Title))
+                                buttonObj["title"] = item.Title;
+                            
+                            if (buttonObj.Count > 0)
+                                buttons.Add(buttonObj);
+                        }
+                        
+                        componentExpando["buttons"] = buttons;
+                        
+                        continue;
+                    }
                 }
                 else
                 {
@@ -166,8 +190,21 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         return dynamicComponents;
     }
 
-    private async Task<string> GetLockStatusAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
+    private async Task<string> GetLockStatusAttributeValue(GenericUoW uow, Data.Entities.Component component,
+        int employeeId, int? contentId)
     {
+        if (contentId != 5)
+        {
+            return "false";
+        }
+        if (component.Id == Constants.Constants.HazirlikComponentId)
+        {
+            return "false";
+        }
+        if (!component.ContentId.HasValue)
+        {
+            return "false";
+        }
         var contentIsHazirlik = await uow.Repository<Data.Entities.Content>()
             .FindByNoTracking(c => c.Id == component.ContentId.Value)
             .FirstOrDefaultAsync();
@@ -180,7 +217,9 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
         // ContentEmployeeAssoc'ta bu employee için bu content'in hazırlık tamamlandı kaydı varsa lockStatus false, yoksa true dönmeli.
         var contentIsHazirlikEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
-            .FindByNoTracking(c => c.ContentId == Constants.Constants.ContentHazirlikId && c.EmployeeId == employeeId)
+            .FindByNoTracking(c => c.ContentId == Constants.Constants.ContentHazirlikId 
+                                   && c.EmployeeId == employeeId
+                                   && c.IsCompleted)
             .AnyAsync();
 
         return contentIsHazirlikEmployeeAssoc ? "false" : "true";

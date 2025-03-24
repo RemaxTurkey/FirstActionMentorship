@@ -19,7 +19,6 @@ public class UpdateComponent(IServiceProvider serviceProvider)
     {
         public int Id { get; set; }
         public int ComponentTypeId { get; set; }
-        public List<ComponentItemDto> Items { get; set; }
         public List<ComponentTypeAttributeValueDto> ComponentTypeAttributeValues { get; set; }
         public bool IsActive { get; set; } = true;
     }
@@ -95,7 +94,6 @@ public class UpdateComponent(IServiceProvider serviceProvider)
         var updatedComponent = await uow.Repository<Data.Entities.Component>()
             .FindBy(c => c.Id == component.Id)
             .Include(c => c.ComponentType)
-            .Include(c => c.ComponentItems)
             .Include(c => c.ComponentAttributeValue)
                 .ThenInclude(cav => cav.ComponentTypeAttribute)
             .FirstOrDefaultAsync();
@@ -105,17 +103,6 @@ public class UpdateComponent(IServiceProvider serviceProvider)
 
     private static void ValidateComponent(Request request, List<int> validAttributeIds)
     {
-        if (request.Items != null && request.Items.Any())
-        {
-            foreach (var item in request.Items)
-            {
-                if (!validAttributeIds.Contains(item.AttributeId))
-                {
-                    throw new BusinessException($"Attribute with ID {item.AttributeId} is not associated with ComponentType {request.ComponentTypeId}");
-                }
-            }
-        }
-
         if (request.ComponentTypeAttributeValues != null && request.ComponentTypeAttributeValues.Any())
         {
             foreach (var attr in request.ComponentTypeAttributeValues)

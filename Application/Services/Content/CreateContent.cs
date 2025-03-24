@@ -90,7 +90,6 @@ public class CreateContent : BaseSvc<CreateContent.Request, CreateContent.Respon
     {
         public int ComponentTypeId { get; set; }
         public int Order { get; set; }
-        public List<ComponentItemDto> Items { get; set; }
         public List<ContentCreationComponentTypeAttributeValueDto> AttributeValue { get; set; } = new();
     }
 

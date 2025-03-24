@@ -197,7 +197,6 @@ public class UpdateContent : BaseSvc<UpdateContent.Request, UpdateContent.Respon
         public int? Id { get; set; }
         public int ComponentTypeId { get; set; }
         public int Order { get; set; }
-        public List<UpdateComponentItemDto> Items { get; set; }
         public List<UpdateContentComponentTypeAttributeValueDto> AttributeValue { get; set; } = new();
     }
 
@@ -206,11 +205,6 @@ public class UpdateContent : BaseSvc<UpdateContent.Request, UpdateContent.Respon
         public int? Id { get; set; }
         public int ComponentTypeAttributeId { get; set; }
         public string Value { get; set; }
-    }
-
-    public class UpdateComponentItemDto : ComponentItemDto
-    {
-        public int? Id { get; set; }
     }
 
     public class Response

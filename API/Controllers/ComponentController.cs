@@ -52,8 +52,7 @@ public class ComponentController : ApiControllerBase
     ///              "componentTypeAttributeId": 2,
     ///              "value": "/menu"
     ///           }
-    ///        ],
-    ///        "componentItems": []
+    ///        ]
     ///     }
     /// </remarks>
     /// <param name="request">Bileşen bilgileri</param>
@@ -86,23 +85,6 @@ public class ComponentController : ApiControllerBase
     {
         request.Id = Id;
         var response = await Svc<UpdateComponent>().InvokeAsync(request);
-        return response;
-    }
-
-    /// <summary>
-    /// Birden fazla bileşen bilgilerini günceller
-    /// </summary>
-    /// <param name="request">Bileşenlerin bilgileri</param>
-    /// <response code="200">Bileşenler başarıyla güncellendi</response>
-    /// <response code="400">Geçersiz istek</response>
-    /// <response code="404">Bileşen bulunamadı</response>
-    [HttpPut("batch")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<UpdateComponentBatch.Response> UpdateComponentBatch([FromBody] UpdateComponentBatch.Request request)
-    {
-        var response = await Svc<UpdateComponentBatch>().InvokeAsync(request);
         return response;
     }
 } 

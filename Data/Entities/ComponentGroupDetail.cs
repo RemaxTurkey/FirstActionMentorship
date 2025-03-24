@@ -1,6 +1,6 @@
 ﻿namespace Data.Entities;
 
-public class ComponentItem : Entity
+public class ButtonGroupDetail : Entity
 {
     public Component Component { get; set; }
     public int ComponentId { get; set; }

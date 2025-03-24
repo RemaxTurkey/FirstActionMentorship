@@ -13,9 +13,3 @@ public class ComponentDto
     public bool IsActive { get; set; } = true;
     public ComponentTypeDto Type { get; set; }
 }
-
-public class ComponentItemDto
-{
-    public string Value { get; set; }
-    public int AttributeId { get; set; }
-} 

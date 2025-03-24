@@ -78,7 +78,6 @@ public class ContentController : ApiControllerBase
                     Id = componentId,
                     ComponentTypeId = componentTypeId,
                     Order = order,
-                    Items = new List<UpdateContent.UpdateComponentItemDto>(),
                     AttributeValue = new List<UpdateContent.UpdateContentComponentTypeAttributeValueDto>()
                 };
 

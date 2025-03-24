@@ -41,13 +41,13 @@ namespace Application.Services.Employee
                           WHERE [Id] = @p7";
             
             await uow.DbContext.Database.ExecuteSqlRawAsync(sql, 
-                req.Facebook, 
-                req.Whatsapp, 
-                req.Twitter, 
-                req.LinkedIn, 
-                req.Instagram, 
-                req.Website, 
-                req.Blogger, 
+                string.IsNullOrWhiteSpace(req.Facebook) ? null : req.Facebook, 
+                string.IsNullOrWhiteSpace(req.Whatsapp) ? null : req.Whatsapp, 
+                string.IsNullOrWhiteSpace(req.Twitter) ? null : req.Twitter, 
+                string.IsNullOrWhiteSpace(req.LinkedIn) ? null : req.LinkedIn, 
+                string.IsNullOrWhiteSpace(req.Instagram) ? null : req.Instagram, 
+                string.IsNullOrWhiteSpace(req.Website) ? null : req.Website, 
+                string.IsNullOrWhiteSpace(req.Blogger) ? null : req.Blogger,
                 req.EmployeeId);
 
             await RemoveCache(req.EmployeeId);

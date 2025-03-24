@@ -27,7 +27,6 @@ public class GetComponent(IServiceProvider serviceProvider)
         var component = await uow.Repository<Data.Entities.Component>()
             .FindBy(c => c.Id == request.Id && c.IsActive)
             .Include(c => c.ComponentType)
-            .Include(c => c.ComponentItems.Where(ci => ci.IsActive))
             .Include(c => c.ComponentAttributeValue.Where(cav => cav.IsActive))
                 .ThenInclude(cav => cav.ComponentTypeAttribute)
             .FirstOrDefaultAsync();

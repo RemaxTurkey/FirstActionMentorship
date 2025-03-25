@@ -30,7 +30,7 @@ namespace Application.Services.Common
 
             return new Response(
                 employeeAcceptance != null,
-                _configuration.GetValue<string>("AcceptanceDocumentUrl")
+                _configuration.GetValue<string>("AppSettings:AcceptanceDocumentUrl")
             );
         }
     }

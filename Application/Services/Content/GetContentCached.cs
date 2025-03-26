@@ -44,6 +44,7 @@ public class GetContentCached : BaseSvc<GetContentCached.Request, GetContentCach
         // Component ve Content ID'lerini güvenli şekilde al
         var componentIds = contentComponentAssoc
             .Where(x => x.ComponentId > 0)
+            .OrderBy(x => x.Order)
             .Select(x => x.ComponentId)
             .Distinct()
             .ToList();
@@ -121,7 +122,14 @@ public class GetContentCached : BaseSvc<GetContentCached.Request, GetContentCach
             assoc.Content = contents.FirstOrDefault(c => c.Id == assoc.ContentId);
         }
 
-        return (contentComponentAssoc, components);
+        var orderedComponents = contentComponentAssoc
+            .OrderBy(x => x.Order)
+            .Select(x => components.FirstOrDefault(c => c.Id == x.ComponentId))
+            .Where(x => x != null)
+            .Distinct()
+            .ToList();
+
+        return (contentComponentAssoc, orderedComponents);
     }
 
     public record Request(int ContentId);

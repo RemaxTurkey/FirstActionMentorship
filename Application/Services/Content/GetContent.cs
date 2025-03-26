@@ -170,7 +170,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                         continue;
                     }
                 }
-                else if (component.Id == Constants.Constants.PowerStartComponentId)
+                else if (component.Id == Constants.Constants.PowerStartComponentId && attr.Id == Constants.Constants.CheckmarkAttributeId)
                 {
                     stringValue = await GetPowerStartPercentage(uow, req.EmployeeId);
                 }

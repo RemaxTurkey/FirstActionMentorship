@@ -8,6 +8,7 @@ namespace Application.Constants
     public static class Constants
     {
         public static string CheckmarkAttributeName = "checkmarkStatus";
+        public static int CheckmarkAttributeId = 4;
         public static string LockStatusAttributeName = "lockstatus";
         public static int ContentHazirlikId = 2;
         public static int ImageSliderComponentTypeId = 6;

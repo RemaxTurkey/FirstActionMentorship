@@ -37,14 +37,16 @@ namespace API.Controllers
         [HttpGet("template/{id}/employee/{employeeId}/type/{typeId}")]
         public async Task<IActionResult> GetTemplate([FromRoute] int id, [FromRoute] int employeeId, [FromRoute] int typeId)
         {
-            var path = string.Concat(_configuration.GetValue<string>("AppSettings:FileUploadPath"), "Templates",
-                _configuration.GetValue<string>("AppSettings:FileUploadPath").Contains("/") ? "/" : "\\");
-            var fileName = string.Concat(Guid.NewGuid().ToString().Replace("-", ""), ".pdf");
+            var ext = typeId == 1 ? ".docx" : ".pdf";
+
+            var path = string.Concat(_configuration.GetValue<string>("AppSettings:FAMFileUploadPath"), "Documents",
+                _configuration.GetValue<string>("AppSettings:FAMFileUploadPath").Contains("/") ? "/" : "\\");
+            var fileName = string.Concat(Guid.NewGuid().ToString().Replace("-", ""), ext);
             var serverName = CommonFunctions.CreateFileName(path, fileName);
             
-            var response = await Svc<GetTemplate>().InvokeAsync(new GetTemplate.Request(id, employeeId));
+            var response = await Svc<GetTemplate>().InvokeAsync(new GetTemplate.Request(id, employeeId, typeId));
             await System.IO.File.WriteAllBytesAsync(path + serverName, response);
-            return Ok(string.Concat(_configuration.GetValue<string>("AppSettings:FileUploadUrl"), "Templates", "/", serverName.Replace("\\", "/")));
+            return Ok(string.Concat(_configuration.GetValue<string>("AppSettings:FAMFileUploadUrl"), "Documents", "/", serverName.Replace("\\", "/")));
         }
     }
 }

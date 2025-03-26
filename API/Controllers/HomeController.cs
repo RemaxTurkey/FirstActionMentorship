@@ -34,8 +34,8 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("template/{id}/employee/{employeeId}")]
-        public async Task<IActionResult> GetTemplate([FromRoute] int id, [FromRoute] int employeeId)
+        [HttpGet("template/{id}/employee/{employeeId}/type/{typeId}")]
+        public async Task<IActionResult> GetTemplate([FromRoute] int id, [FromRoute] int employeeId, [FromRoute] int typeId)
         {
             var path = string.Concat(_configuration.GetValue<string>("AppSettings:FileUploadPath"), "Templates",
                 _configuration.GetValue<string>("AppSettings:FileUploadPath").Contains("/") ? "/" : "\\");

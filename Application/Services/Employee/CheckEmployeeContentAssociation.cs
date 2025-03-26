@@ -34,7 +34,7 @@ public class
             exists = await uow.Repository<ContentEmployeeAssoc>()
                 .FindByNoTracking(x =>
                     x.ContentId == req.ContentId &&
-                    x.EmployeeId == req.EmployeeId)
+                    x.EmployeeId == req.EmployeeId && x.IsCompleted)
                 .AnyAsync();
         }
         else if (req.PageType == PageType.Static)

@@ -138,7 +138,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                         continue;
                     }
                 }
-                else if (attr.Id == Constants.Constants.ButtonGroupComponentTypeId)
+                else if (component.ComponentTypeId == Constants.Constants.ButtonGroupComponentTypeId)
                 {
                     var componentItems = await uow.Repository<ButtonGroupDetail>()
                         .FindByNoTracking(x => x.ComponentId == component.Id)

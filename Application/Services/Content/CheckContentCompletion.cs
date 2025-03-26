@@ -14,7 +14,8 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var siblingContents = await uow.Repository<Data.Entities.Content>()
-            .FindByNoTracking(x => x.ParentId == req.ParentContentId)
+            .FindByNoTracking(x => x.ParentId == req.ParentContentId 
+                                   && x.PageType == PageType.Content)
             .ToListAsync();
 
         var siblingContentIds = siblingContents.Select(x => x.Id).ToList();

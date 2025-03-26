@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Controllers.Base;
+using API.Extensions;
 using Application.Services.Common;
+using Application.Services.Neighbor;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -11,6 +13,13 @@ namespace API.Controllers
     [Route("api/")]
     public class HomeController : ApiControllerBase
     {
+        private readonly IConfiguration _configuration;
+
+        public HomeController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [HttpPost("{employeeId}/AcceptTerms")]
         public async Task<IActionResult> AcceptTerms([FromRoute] int employeeId)
         {
@@ -23,6 +32,19 @@ namespace API.Controllers
         {
             var response = await Svc<GetAcceptanceStatus>().InvokeAsync(new GetAcceptanceStatus.Request(employeeId));
             return Ok(response);
+        }
+
+        [HttpGet("template/{id}/employee/{employeeId}")]
+        public async Task<IActionResult> GetTemplate([FromRoute] int id, [FromRoute] int employeeId)
+        {
+            var path = string.Concat(_configuration.GetValue<string>("AppSettings:FileUploadPath"), "Templates",
+                _configuration.GetValue<string>("AppSettings:FileUploadPath").Contains("/") ? "/" : "\\");
+            var fileName = string.Concat(Guid.NewGuid().ToString().Replace("-", ""), ".pdf");
+            var serverName = CommonFunctions.CreateFileName(path, fileName);
+            
+            var response = await Svc<GetTemplate>().InvokeAsync(new GetTemplate.Request(id, employeeId));
+            await System.IO.File.WriteAllBytesAsync(path + serverName, response);
+            return Ok(string.Concat(_configuration.GetValue<string>("AppSettings:FileUploadUrl"), "Templates", "/", serverName.Replace("\\", "/")));
         }
     }
 }

@@ -9,6 +9,7 @@ using Application.Services.ComponentTypeAttribute.DTOs;
 using Application.Services.Employee;
 using Application.UnitOfWorks;
 using Data.Entities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -113,7 +114,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 var attributeName = attr.Name;
                 string stringValue = null;
 
-                if (attributeName == Constants.Constants.CheckmarkAttributeName)
+                if (attributeName == Constants.Constants.CheckmarkAttributeName && component.Id != Constants.Constants.PowerStartComponentId) // 40 power start eğitimi özel kural var.
                 {
                     stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);
                 }
@@ -137,7 +138,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                         continue;
                     }
                 }
-                else if (attr.Id == Constants.Constants.ButtonGroupComponentTypeId)
+                else if (component.ComponentTypeId == Constants.Constants.ButtonGroupComponentTypeId)
                 {
                     var componentItems = await uow.Repository<ButtonGroupDetail>()
                         .FindByNoTracking(x => x.ComponentId == component.Id)
@@ -169,6 +170,10 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                         continue;
                     }
                 }
+                else if (component.Id == Constants.Constants.PowerStartComponentId)
+                {
+                    stringValue = await GetPowerStartPercentage(uow, req.EmployeeId);
+                }
                 else
                 {
                     var attributeValue = componentAttributeValues
@@ -188,6 +193,21 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         }
 
         return dynamicComponents;
+    }
+
+    private async Task<string> GetPowerStartPercentage(GenericUoW uow, int employeeId)
+    {
+        var sql = @$"SELECT 
+                        eam.CompletionPercentage AS Value
+                    FROM dbo.EmployeeAcademy ea
+                    INNER JOIN dbo.EmployeeAcademyModule eam ON eam.EmployeeAcademyId = ea.Id 
+                    WHERE ea.EmployeeId = {employeeId}";
+
+        var percentage = await uow.DbContext.Database
+            .SqlQueryRaw<decimal>(sql)
+            .FirstOrDefaultAsync();
+
+        return percentage >= 83 ? "true" : "false";
     }
 
     private async Task<string> GetLockStatusAttributeValue(GenericUoW uow, Data.Entities.Component component,

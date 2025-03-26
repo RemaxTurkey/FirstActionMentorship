@@ -13,5 +13,6 @@ namespace Application.Constants
         public static int ImageSliderComponentTypeId = 6;
         public static int ButtonGroupComponentTypeId = 9;
         public static int HazirlikComponentId = 26;
+        public static int PowerStartComponentId = 40;
     }
 }

@@ -1,4 +1,5 @@
 using Application.Services.Base;
+using Application.Services.Employee;
 using Application.UnitOfWorks;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,53 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
 
         var recordedContentIds = contentRecords.Select(x => x.ContentId).Distinct().ToList();
 
+        if (req.ParentContentId == Constants.Constants.ContentHazirlikId)
+        {
+            var photo = await Svc<CheckEmployeeContentAssociation>().InvokeNoTrackingAsync(
+                new CheckEmployeeContentAssociation.Request(ContentId: 7, EmployeeId: req.EmployeeId, PageType.Static));
+
+            if (!photo.Exists)
+            {
+                return new Response
+                {
+                    AllContentsCompleted = false
+                };
+            }
+
+            var videoCv = await Svc<CheckEmployeeContentAssociation>().InvokeNoTrackingAsync(
+                new CheckEmployeeContentAssociation.Request(ContentId: 9, EmployeeId: req.EmployeeId, PageType.Static));
+
+            if (!videoCv.Exists)
+            {
+                return new Response
+                {   
+                    AllContentsCompleted = false
+                };
+            }
+            
+            var introduction = await Svc<CheckEmployeeContentAssociation>().InvokeNoTrackingAsync(
+                new CheckEmployeeContentAssociation.Request(ContentId: 8, EmployeeId: req.EmployeeId, PageType.Static));
+
+            if (!introduction.Exists)
+            {
+                return new Response
+                {
+                    AllContentsCompleted = false
+                };
+            }
+
+            var socialMedia = await Svc<CheckEmployeeContentAssociation>().InvokeNoTrackingAsync(
+                new CheckEmployeeContentAssociation.Request(ContentId: 10, EmployeeId: req.EmployeeId, PageType.Static));
+
+            if (!socialMedia.Exists)
+            {
+                return new Response
+                {
+                    AllContentsCompleted = false
+                };
+            }
+        }
+        
         bool allContentsCompleted = siblingContentIds.All(id => recordedContentIds.Contains(id));
 
         if (allContentsCompleted)

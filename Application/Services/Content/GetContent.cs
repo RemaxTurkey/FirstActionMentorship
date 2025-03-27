@@ -122,7 +122,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 {
                     stringValue = await GetLockStatusAttributeValue(uow, component, req.EmployeeId, req.Id);
                 }
-                else if (attr.Id == Constants.Constants.ImageSliderComponentTypeId)
+                else if (attr.Id == Constants.Constants.ImageSliderAttributeId && component.ComponentTypeId == Constants.Constants.ImageSliderComponentTypeId)
                 {
                     stringValue = component.ImageUrls;
                     

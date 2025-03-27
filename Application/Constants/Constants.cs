@@ -15,5 +15,6 @@ namespace Application.Constants
         public static int ButtonGroupComponentTypeId = 9;
         public static int HazirlikComponentId = 26;
         public static int PowerStartComponentId = 40;
+        public static int PowerStartContentId = 26;
     }
 }

@@ -151,9 +151,13 @@ public class
                         
                         break;
                     }
-                case 4: // Portföy Edinme -> Komşu Mektubunu Dağıt
+                case 22: // Portföy Edinme -> Komşu Mektubunu Dağıt
                     {
-                        exists = false;
+                        exists = await uow.Repository<ContentEmployeeRecord>()
+                            .FindByNoTracking(x =>
+                                x.ContentId == req.ContentId &&
+                                x.EmployeeId == req.EmployeeId)
+                            .AnyAsync();
                         break;
                     }
                 default:

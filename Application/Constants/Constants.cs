@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Application.Constants
 {
@@ -15,7 +12,10 @@ namespace Application.Constants
         public static int ImageSliderAttributeId = 6;
         public static int ButtonGroupComponentTypeId = 9;
         public static int HazirlikComponentId = 26;
-        public static int PowerStartComponentId = 40;
-        public static int PowerStartContentId = 26;
+
+        public static int PazarlamaContentId = 27;
+
+        public static int KomsuMektubuDagitContentId = 22;
+        public static int KomsuMektubuDagitParentContentId = 25;
     }
 }

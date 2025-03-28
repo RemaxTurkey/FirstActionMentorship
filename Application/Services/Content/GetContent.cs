@@ -21,6 +21,8 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     {
     }
 
+    private bool HazirlikCheckMarkStatus = false;
+
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
         var cachedContentResponse = await Svc<GetContentCached>().InvokeAsync(
@@ -113,10 +115,14 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             {
                 var attributeName = attr.Name;
                 string stringValue = null;
-
-                if (attributeName == Constants.Constants.CheckmarkAttributeName && component.Id != Constants.Constants.PowerStartComponentId) // 40 power start eğitimi özel kural var.
+                
+                if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
                     stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);
+                    if (component.Id == Constants.Constants.HazirlikComponentId)
+                    {
+                        HazirlikCheckMarkStatus = stringValue == "true";
+                    }
                 }
                 else if (attributeName == Constants.Constants.LockStatusAttributeName)
                 {
@@ -170,10 +176,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                         continue;
                     }
                 }
-                else if (component.Id == Constants.Constants.PowerStartComponentId && attr.Id == Constants.Constants.CheckmarkAttributeId)
-                {
-                    stringValue = await GetPowerStartPercentage(uow, req.EmployeeId);
-                }
                 else
                 {
                     var attributeValue = componentAttributeValues
@@ -195,20 +197,20 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         return dynamicComponents;
     }
 
-    private async Task<string> GetPowerStartPercentage(GenericUoW uow, int employeeId)
-    {
-        var sql = @$"SELECT 
-                        eam.CompletionPercentage AS Value
-                    FROM dbo.EmployeeAcademy ea
-                    INNER JOIN dbo.EmployeeAcademyModule eam ON eam.EmployeeAcademyId = ea.Id 
-                    WHERE ea.EmployeeId = {employeeId}";
-
-        var percentage = await uow.DbContext.Database
-            .SqlQueryRaw<decimal>(sql)
-            .FirstOrDefaultAsync();
-
-        return percentage >= 83 ? "true" : "false";
-    }
+    // private async Task<string> GetPowerStartPercentage(GenericUoW uow, int employeeId)
+    // {
+    //     var sql = @$"SELECT 
+    //                     eam.CompletionPercentage AS Value
+    //                 FROM dbo.EmployeeAcademy ea
+    //                 INNER JOIN dbo.EmployeeAcademyModule eam ON eam.EmployeeAcademyId = ea.Id 
+    //                 WHERE ea.EmployeeId = {employeeId}";
+    //
+    //     var percentage = await uow.DbContext.Database
+    //         .SqlQueryRaw<decimal>(sql)
+    //         .FirstOrDefaultAsync();
+    //
+    //     return percentage >= 83 ? "true" : "false";
+    // }
 
     private async Task<string> GetLockStatusAttributeValue(GenericUoW uow, Data.Entities.Component component,
         int employeeId, int? contentId)
@@ -235,6 +237,11 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             return "false";
         }
 
+        if (!HazirlikCheckMarkStatus)
+        {
+            return "true";
+        }
+
         // ContentEmployeeAssoc'ta bu employee için bu content'in hazırlık tamamlandı kaydı varsa lockStatus false, yoksa true dönmeli.
         var contentIsHazirlikEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
             .FindByNoTracking(c => c.ContentId == Constants.Constants.ContentHazirlikId 
@@ -244,9 +251,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
 
         return contentIsHazirlikEmployeeAssoc ? "false" : "true";
     }
-
-
-
+    
     private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
     {
         if (!component.ContentId.HasValue)

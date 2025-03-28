@@ -10,4 +10,5 @@ public class ContentEmployeeRecord : Entity
     
     public DateTime? CompletionDate { get; set; }
     public int EmployeeId { get; set; }
+    public int? PropertyId { get; set; }
 }

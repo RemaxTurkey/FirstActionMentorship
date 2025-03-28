@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Application.Services.Content;
 
-public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, SaveAndGetNextContent.Response>
+public class SaveContent : BaseSvc<SaveContent.Request, SaveContent.Response>
 {
-    public SaveAndGetNextContent(IServiceProvider serviceProvider) : base(serviceProvider)
+    public SaveContent(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
 
@@ -23,11 +23,12 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
         if (contentEmployeeAssoc != null)
         {
             var recordIsExist = await uow.Repository<ContentEmployeeRecord>()
-                .FindByNoTracking(x => x.ContentId == req.SaveContentId 
-                    && x.ContentEmployeeAssocId == contentEmployeeAssoc.Id)
-                .FirstOrDefaultAsync();
+                .FindByNoTracking(x => x.ContentId == req.SaveContentId
+                    && x.ContentEmployeeAssocId == contentEmployeeAssoc.Id
+                    && x.PropertyId == req.PropertyId)
+                .AnyAsync();
 
-            if (recordIsExist == null)
+            if (!recordIsExist)
             {
                 var contentEmployeeRecord = new ContentEmployeeRecord
                 {
@@ -35,23 +36,30 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
                     CompletionDate = DateTime.Now,
                     ContentEmployeeAssocId = contentEmployeeAssoc.Id,
                     EmployeeId = req.EmployeeId,
+                    PropertyId = req.PropertyId,
                     IsActive = true
                 };
 
                 await uow.Repository<ContentEmployeeRecord>().AddAsync(contentEmployeeRecord);
                 await uow.SaveChangesAsync();
             }
-            
+
             var parentContentId = await uow.Repository<Data.Entities.Content>()
                 .FindByNoTracking(x => x.Id == req.SaveContentId)
                 .Select(x => x.ParentId)
                 .FirstOrDefaultAsync();
 
-            if (parentContentId.HasValue)
+            if (parentContentId == Constants.Constants.PazarlamaContentId)
+            {
+                await Svc<CheckPazarlamaContentCompletion>().InvokeAsync(
+                    uow,
+                    new CheckPazarlamaContentCompletion.Request(req.EmployeeId, req.PropertyId.Value));
+            }
+            else if (parentContentId.HasValue)
             {
                 await Svc<CheckContentCompletion>().InvokeAsync(
                     uow,
-                    new CheckContentCompletion.Request(parentContentId.Value, req.EmployeeId));
+                    new CheckContentCompletion.Request(parentContentId.Value, req.EmployeeId, req.PropertyId));
             }
         }
 
@@ -61,10 +69,10 @@ public class SaveAndGetNextContent : BaseSvc<SaveAndGetNextContent.Request, Save
         };
     }
 
-    public record Request(int SaveContentId, int NextContentId, int EmployeeId);
+    public record Request(int SaveContentId, int NextContentId, int EmployeeId, int? PropertyId = null);
 
     public class Response
     {
         public bool Item { get; set; }
     }
-} 
+}

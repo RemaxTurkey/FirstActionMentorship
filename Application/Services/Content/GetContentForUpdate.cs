@@ -38,9 +38,7 @@ public class GetContentForUpdate : BaseSvc<GetContentForUpdate.Request, GetConte
             cachedAttributeResponse.AttributesByComponentId
         );
 
-        var dynamicComponents = await CreateDynamicComponents(
-            uow,
-            req,
+        var dynamicComponents = CreateDynamicComponents(
             contentData.Components,
             contentData.ContentComponentAssoc,
             attributeData.DefaultAttributes,
@@ -59,9 +57,7 @@ public class GetContentForUpdate : BaseSvc<GetContentForUpdate.Request, GetConte
         };
     }
 
-    private async Task<List<dynamic>> CreateDynamicComponents(
-        GenericUoW uow,
-        Request req,
+    private List<dynamic> CreateDynamicComponents(
         List<Data.Entities.Component> components,
         List<ContentComponentAssoc> contentComponentAssoc,
         List<ComponentTypeAttributeDto> defaultAttributes,

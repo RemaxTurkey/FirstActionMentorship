@@ -14,13 +14,11 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
 
     protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
     {
-        var siblingContents = await uow.Repository<Data.Entities.Content>()
-            .FindByNoTracking(x => x.ParentId == req.ParentContentId 
-                                   && x.PageType == PageType.Content
-                                   && x.Id != Constants.Constants.PowerStartContentId)
-            .ToListAsync();
+        var siblingContents = await Svc<GetSiblingContents>().InvokeAsync(
+            uow,
+            new GetSiblingContents.Request(req.ParentContentId, req.EmployeeId, req.PropertyId));
 
-        var siblingContentIds = siblingContents.Select(x => x.Id).ToList();
+        var siblingContentIds = siblingContents.Contents.Select(x => x.Id).ToList();
 
         var contentRecords = await uow.Repository<ContentEmployeeRecord>()
             .FindByNoTracking(x => siblingContentIds.Contains(x.ContentId))
@@ -100,7 +98,7 @@ public class CheckContentCompletion : BaseSvc<CheckContentCompletion.Request, Ch
         };
     }
 
-    public record Request(int ParentContentId, int EmployeeId);
+    public record Request(int ParentContentId, int EmployeeId, int? PropertyId = null);
 
     public class Response
     {

@@ -1,5 +1,6 @@
 using Application.Common;
 using Application.Services.Base;
+using Application.Services.Content;
 using Application.UnitOfWorks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,9 @@ public class SetEmployeePhoto : BaseSvc<SetEmployeePhoto.Request, SetEmployeePho
         await uow.DbContext.Database.ExecuteSqlRawAsync(sql, employeePath, req.EmployeeId);
 
         await uow.SaveChangesAsync();
+
+        await Svc<CheckContentCompletion>().InvokeAsync(uow,
+            new CheckContentCompletion.Request(Constants.Constants.ContentHazirlikId, req.EmployeeId));
 
         await uow.Repository<Data.Entities.dbo.EmployeeRecordHistory>().AddAsync(new Data.Entities.dbo.EmployeeRecordHistory
         {

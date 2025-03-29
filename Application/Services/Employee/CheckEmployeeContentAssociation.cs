@@ -37,55 +37,59 @@ public class
                     x.EmployeeId == req.EmployeeId && x.IsCompleted)
                 .AnyAsync();
 
-            if (req.ContentId == Constants.Constants.ContentHazirlikId)
+            // hazırlıksa staitk sayfaları kontrol et
+            if (req.ContentId != Constants.Constants.ContentHazirlikId)
             {
-                var profilePhoto = await Svc<GetEmployeePhoto>().InvokeNoTrackingAsync(new GetEmployeePhoto.Request()
-                {
-                    EmployeeId = req.EmployeeId
-                });
-
-                if (string.IsNullOrEmpty(profilePhoto.Photo))
-                {
-                    exists = false;
-                }
-                
-                var introduction = await Svc<GetEmployeeIntroduction>().InvokeNoTrackingAsync(new GetEmployeeIntroduction.Request()
-                {
-                    EmployeeId = req.EmployeeId
-                });
-
-                if (string.IsNullOrEmpty(introduction.Introduction))
-                {
-                    exists = false;
-                }
-                
-                var video = await Svc<GetEmployeeVideoLink>().InvokeNoTrackingAsync(new GetEmployeeVideoLink.Request()
-                {
-                    EmployeeId = req.EmployeeId
-                });
-
-                if (string.IsNullOrEmpty(video.VideoLink))
-                {
-                    exists = false;
-                }
-                
-                var socialMedia = await Svc<GetEmployeeSocialMediaDetails>().InvokeNoTrackingAsync(new GetEmployeeSocialMediaDetails.Request()
-                {
-                    EmployeeId = req.EmployeeId
-                });
-
-                if (string.IsNullOrEmpty(socialMedia.Facebook) &&
-                    string.IsNullOrEmpty(socialMedia.Instagram) &&
-                    string.IsNullOrEmpty(socialMedia.Twitter) &&
-                    string.IsNullOrEmpty(socialMedia.LinkedIn) &&
-                    string.IsNullOrEmpty(socialMedia.Blogger) &&
-                    string.IsNullOrEmpty(socialMedia.Whatsapp) &&
-                    string.IsNullOrEmpty(socialMedia.Website))
-                {
-                    exists = false;
-                }
+                return new Response(exists);
             }
             
+            exists = true;
+            var profilePhoto = await Svc<GetEmployeePhoto>().InvokeNoTrackingAsync(new GetEmployeePhoto.Request()
+            {
+                EmployeeId = req.EmployeeId
+            });
+
+            if (string.IsNullOrEmpty(profilePhoto.Photo))
+            {
+                exists = false;
+            }
+                
+            var introduction = await Svc<GetEmployeeIntroduction>().InvokeNoTrackingAsync(new GetEmployeeIntroduction.Request()
+            {
+                EmployeeId = req.EmployeeId
+            });
+
+            if (string.IsNullOrEmpty(introduction.Introduction))
+            {
+                exists = false;
+            }
+                
+            var video = await Svc<GetEmployeeVideoLink>().InvokeNoTrackingAsync(new GetEmployeeVideoLink.Request()
+            {
+                EmployeeId = req.EmployeeId
+            });
+
+            if (string.IsNullOrEmpty(video.VideoLink))
+            {
+                exists = false;
+            }
+                
+            var socialMedia = await Svc<GetEmployeeSocialMediaDetails>().InvokeNoTrackingAsync(new GetEmployeeSocialMediaDetails.Request()
+            {
+                EmployeeId = req.EmployeeId
+            });
+
+            if (string.IsNullOrEmpty(socialMedia.Facebook) &&
+                string.IsNullOrEmpty(socialMedia.Instagram) &&
+                string.IsNullOrEmpty(socialMedia.Twitter) &&
+                string.IsNullOrEmpty(socialMedia.LinkedIn) &&
+                string.IsNullOrEmpty(socialMedia.Blogger) &&
+                string.IsNullOrEmpty(socialMedia.Whatsapp) &&
+                string.IsNullOrEmpty(socialMedia.Website))
+            {
+                exists = false;
+            }
+
         }
         else if (req.PageType == PageType.Static)
         {

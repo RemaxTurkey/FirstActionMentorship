@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Application.Services.Base;
+using Application.Services.Content;
 using Application.UnitOfWorks;
 using Data.Entities.dbo;
 
@@ -38,6 +39,9 @@ namespace Application.Services.Employee
 
                 await uow.Repository<EmployeeDescription>().AddAsync(employeeDescription);
                 await uow.SaveChangesAsync();
+
+                await Svc<CheckContentCompletion>().InvokeAsync(uow,
+                    new CheckContentCompletion.Request(Constants.Constants.ContentHazirlikId, req.EmployeeId));
 
                 await RemoveCache(req.EmployeeId);
 

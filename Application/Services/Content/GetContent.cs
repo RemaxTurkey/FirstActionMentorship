@@ -116,6 +116,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 var attributeName = attr.Name;
                 string stringValue = null;
                 
+                
                 if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
                     stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);

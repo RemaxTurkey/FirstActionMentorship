@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Application.Attributes;
 using Application.Services.Base;
@@ -26,7 +27,7 @@ namespace Application.Services.Employee
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employeeDescription = await uow.Repository<EmployeeDescription>()
-                .GetAsync(e => e.EmployeeId == req.EmployeeId 
+                .GetAsync(e => e.EmployeeId == req.EmployeeId
                                && e.Active == true && e.LanguageId == 1);
 
             if (employeeDescription == null)
@@ -37,10 +38,17 @@ namespace Application.Services.Employee
                 };
             }
 
+            var introduction = employeeDescription.Introduction;
+
+            var removeHtmLtagsRegex = new Regex("<(?:\"[^\"]*\"['\"]*|'[^']*'['\"]*|[^'\">])+>");
+            introduction = !String.IsNullOrEmpty(introduction)
+                ? removeHtmLtagsRegex.Replace(introduction, "").Replace("&nbsp;", " ").Replace("\r\n", " ")
+                : "";
+
             return new Response
             {
-                Introduction = employeeDescription.Introduction ?? string.Empty
+                Introduction = introduction
             };
         }
     }
-} 
+}

@@ -119,7 +119,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 
                 if (attributeName == Constants.Constants.CheckmarkAttributeName)
                 {
-                    stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId);
+                    stringValue = await GetCheckmarkAttributeValue(uow, component, req.EmployeeId, req.PropertyId);
                     if (component.Id == Constants.Constants.HazirlikComponentId)
                     {
                         HazirlikCheckMarkStatus = stringValue == "true";
@@ -253,7 +253,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         return contentIsHazirlikEmployeeAssoc ? "false" : "true";
     }
     
-    private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId)
+    private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId, int? propertyId)
     {
         if (!component.ContentId.HasValue)
         {
@@ -269,7 +269,8 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             new CheckEmployeeContentAssociation.Request(
                 component.ContentId.Value,
                 employeeId,
-                contentPageTypeResponse.PageType));
+                contentPageTypeResponse.PageType,
+                propertyId));
 
         return employeeAssocResponse.Exists ? "true" : "false";
     }
@@ -340,7 +341,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
         }
     }
 
-    public record Request(int? Id, int EmployeeId);
+    public record Request(int? Id, int EmployeeId, int? PropertyId = null);
 
     public class Response
     {

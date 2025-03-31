@@ -26,6 +26,13 @@ public class ContentController : ApiControllerBase
         return response;
     }
 
+    [HttpGet("{Id}/Employee/{EmployeeId}/Property/{PropertyId}")]
+    public async Task<GetContent.Response> GetContentProperty([FromRoute] GetContent.Request request)
+    {
+        var response = await Svc<GetContent>().InvokeNoTrackingAsync(request);
+        return response;
+    }
+    
     [HttpPost("save/{SaveContentId}/next/{NextContentId}/employee/{EmployeeId}")]
     public async Task<SaveContent.Response> SaveAndGetNextContent([FromRoute] SaveContent.Request request)
     {

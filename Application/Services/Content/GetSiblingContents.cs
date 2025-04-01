@@ -25,13 +25,13 @@ namespace Application.Services.Content
             
             var siblingContents = await uow.Repository<Data.Entities.Content>()
                 .FindByNoTracking(x => x.ParentId == req.ParentContentId
-                                       && x.PageType == PageType.Content )
+                                       && x.PageType == PageType.Content)
                 .ToListAsync();
 
             return new Response(siblingContents);
         }
 
-        public record Request(int ParentContentId, int EmployeeId, int? PropertyId = null);
+        public record Request(int ParentContentId, int? EmployeeId = null, int? PropertyId = null);
         public record Response(List<Data.Entities.Content> Contents);
     }
 }

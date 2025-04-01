@@ -1,4 +1,5 @@
 ﻿using Application.Services.Base;
+using Application.Services.Content;
 using Application.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,10 @@ public class SetEmployeeVideoLink : BaseSvc<SetEmployeeVideoLink.Request, SetEmp
     {
         string sql = "UPDATE [dbo].[Employee] SET [Video] = @p0 WHERE [Id] = @p1";
         await uow.DbContext.Database.ExecuteSqlRawAsync(sql, req.VideoLink, req.EmployeeId);
+
+        await Svc<CheckContentCompletion>().InvokeAsync(uow,
+            new CheckContentCompletion.Request(Constants.Constants.ContentHazirlikId, req.EmployeeId));
+
         await RemoveCache(req.EmployeeId);
         return new Response();
     }

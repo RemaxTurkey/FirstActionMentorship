@@ -53,6 +53,7 @@ public class
                 return new Response(exists);
             }
 
+            // burası employee işlemi olduğunda çalışlır sadece
             var profilePhoto = await Svc<GetEmployeePhoto>().InvokeNoTrackingAsync(new GetEmployeePhoto.Request()
             {
                 EmployeeId = req.EmployeeId
@@ -114,12 +115,20 @@ public class
             {
                 var siblingContentCount = siblingCheck.Contents.Count;
                 var siblingContentCompletedCount = 0;
-                foreach (var sibling in siblingCheck.Contents)
+                var allSibllingContents = await uow.Repository<ContentEmployeeRecord>()
+                    .FindByNoTracking(x =>
+                        siblingCheck.Contents.Select(x => x.Id).Contains(x.ContentId) &&
+                        x.EmployeeId == req.EmployeeId)
+                    .ToListAsync();
+
+
+                for (int i = 0; i < siblingCheck.Contents.Count; i++)
                 {
+                    Data.Entities.Content sibling = siblingCheck.Contents[i];
                     var siblingContentCompleted = await uow.Repository<ContentEmployeeRecord>()
                         .FindByNoTracking(x =>
-                            x.ContentId == sibling.Id &&
-                            x.EmployeeId == req.EmployeeId)
+                            siblingCheck.Contents.Select(x => x.Id).Contains(x.ContentId)
+                            && x.EmployeeId == req.EmployeeId)
                         .AnyAsync();
 
                     if (siblingContentCompleted)

@@ -9,5 +9,6 @@ namespace Data.Entities
     {
         public int EmployeeId { get; set; }
         public DateTime AcceptanceDate { get; set; }
+        public bool? IsBrokerNotified { get; set; }
     }
 }

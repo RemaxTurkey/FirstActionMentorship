@@ -4,6 +4,7 @@ using API.Filters;
 using Application.Common;
 using Application.Extensions;
 using Application.RedisCache;
+using Application.Services.Mail;
 using Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -15,7 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddControllers(options => { options.Filters.Add<ApiResponseAttribute>(); });
+builder.Services.Configure<MailSettingsOptions>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Logging.ConfigureLogging()
     .ConfigureEntityFrameworkLogging(false, LogLevel.Debug);
 

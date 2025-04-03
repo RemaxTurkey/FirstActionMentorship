@@ -1,6 +1,7 @@
 using API;
 using API.Extensions;
 using API.Filters;
+using API.Services;
 using Application.Common;
 using Application.Extensions;
 using Application.RedisCache;
@@ -27,6 +28,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RemaxDB")));
 
 builder.Services.AddSingleton<ICacheManager, CacheManager>();
+
+// BackgroundService kaydı
+builder.Services.AddHostedService<DailyTaskService>();
 
 builder.Services.RegisterInjectableServices();
 builder.Services.AddCommonService();

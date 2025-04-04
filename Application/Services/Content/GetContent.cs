@@ -84,11 +84,7 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
     {
         var dynamicComponents = new List<dynamic>();
         var componentOrderMap = contentComponentAssoc.ToDictionary(x => x.ComponentId, x => x.Order);
-
-        var allComponentAttributeValues = await uow.Repository<ComponentAttributeValue>()
-            .FindByNoTracking(x => x.ComponentId == Constants.Constants.HazirlikComponentId)
-            .ToListAsync();
-
+        
         // Her bir component için ayrı ayrı işlem yap
         foreach (var component in components)
         {
@@ -100,9 +96,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 uow, new GetComponentTypeAttributes.Request(componentTypeId));
 
             var componentTypeAttributes = typeAttributesResponse.Attributes;
-
-            // Component'in mevcut attribute değerlerini al
-            var componentAttributeValues = allComponentAttributeValues.Where(x => x.ComponentId == component.Id).ToList();
 
             // Component için dynamicObject oluştur
             var componentExpando = new ExpandoObject() as IDictionary<string, object>;
@@ -180,6 +173,10 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
                 }
                 else
                 {
+                    var componentAttributeValues = await uow.Repository<ComponentAttributeValue>()
+                        .FindByNoTracking(cav => cav.ComponentId == component.Id && cav.IsActive)
+                        .ToListAsync();
+                    
                     var attributeValue = componentAttributeValues
                         .FirstOrDefault(cav => cav.ComponentTypeAttributeId == attr.Id);
 

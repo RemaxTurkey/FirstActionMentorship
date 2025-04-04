@@ -21,3 +21,8 @@ riderModule.iml
 [Oo]bj/
 _UpgradeReport_Files/
 [Pp]ackages/
+
+# Application Settings
+appsettings.json
+**/appsettings.Development.json
+**/appsettings.Production.json

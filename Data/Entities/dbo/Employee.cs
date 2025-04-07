@@ -10,15 +10,11 @@ public class Employee : Entity
     public string FramesNo { get; set; }
     public string GlobalId { get; set; }
     public bool TransferGlobal { get; set; }
-
-    public byte EmployeeStatusId { get; set; }
     public string NameOnDoc { get; set; }
     public string SurnameOnDoc { get; set; }
     public string NameSurname { get; set; }
     public string UserName { get; set; }
     public string Password { get; set; }
-    public byte? ClubMembershipId { get; set; }
-    public byte? ClubMembershipGlobalId { get; set; }
     public string MobileCodePersonal { get; set; }
     public string MobileNoPersonal { get; set; }
     public string MobileCodeWork { get; set; }
@@ -33,12 +29,11 @@ public class Employee : Entity
     public DateTime? SubscriptionExpireDate { get; set; }
     public DateTime? ApprovalDate { get; set; }
     public DateTime? RemoveDate { get; set; }
-    public byte? PointShare { get; set; }
     public bool SmsSend { get; set; }
     public bool IsEYT { get; set; }
     public bool? IsHaveKids { get; set; }
     public DateTime? BirthDate { get; set; }
-    public byte? Sex { get; set; }
+    
     public string BirthPlace { get; set; }
     public byte? Education { get; set; }
     public int? RemoveReasonId { get; set; }
@@ -53,7 +48,6 @@ public class Employee : Entity
     public string ResidenceZipCode { get; set; }
     public int? TeamId { get; set; }
     public decimal? CommentRate { get; set; }
-    public byte? IdentificationType { get; set; }
     public string IdentificationNo { get; set; }
     public bool? CriminalRecordApproved { get; set; }
     public bool? GdtAuthority { get; set; }
@@ -63,7 +57,6 @@ public class Employee : Entity
     public string AccountingMobilePhoneCode { get; set; }
     public string AccountingMobilePhoneNo { get; set; }
     public string AccountingEmail { get; set; }
-    public byte? MaritalStatus { get; set; }
     public int? RoleId { get; set; }
     public string Blogger { get; set; }
     public string Video { get; set; }
@@ -77,7 +70,6 @@ public class Employee : Entity
     public string GooglePlus { get; set; }
     public string Instagram { get; set; }
     public bool? DeletedPoolShare { get; set; }
-    public byte? SiteOrder { get; set; }
     public string ProfessionalCertificateNumber { get; set; }
     public string DiplomaFile { get; set; }
     public bool? BlackListed { get; set; }
@@ -86,7 +78,6 @@ public class Employee : Entity
     public DateTime? AuthorizationLicenceStartDate { get; set; }
     public string AuthorizationLicenceFile { get; set; }
     public string AuthorizationLicenceRejectNote { get; set; }
-    public byte? RegionId { get; set; }
     public string SgkDeclaration { get; set; }
     public int? NationalityId { get; set; }
     public string SpouseName { get; set; }
@@ -101,7 +92,6 @@ public class Employee : Entity
     public string OtherEmployeeCodes { get; set; }
     public int? RtDepartmentId { get; set; }
     public int? RtJobId { get; set; }
-    public byte? RtOrder { get; set; }
     public bool? RtHideOnList { get; set; }
     public bool? ShowCommunicationOnWebsite { get; set; }
     public int CriminalStatus { get; set; }
@@ -118,7 +108,6 @@ public class Employee : Entity
     public bool? BlockAutoPropertyApprove { get; set; }
     public DateTime? CriminalFileExpireDate { get; set; }
     public bool? ShowFirstLoginMessage { get; set; }
-    public byte? ChildrenCount { get; set; }
     public int? ReferenceEmployeeId { get; set; }
     
     public override bool IsActive => true;

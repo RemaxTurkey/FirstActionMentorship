@@ -230,7 +230,6 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             .FindByNoTracking(c => c.Id == component.ContentId.Value)
             .FirstOrDefaultAsync();
 
-        // hazırlık id=2. content hazırlık altındaki bir menü ise kontrol gerektiği için kontrol ekledim.
         if (contentIsHazirlik == null && contentIsHazirlik.Id != Constants.Constants.ContentHazirlikId)
         {
             return "false";
@@ -241,14 +240,18 @@ public class GetContent : BaseSvc<GetContent.Request, GetContent.Response>
             return "true";
         }
 
-        // ContentEmployeeAssoc'ta bu employee için bu content'in hazırlık tamamlandı kaydı varsa lockStatus false, yoksa true dönmeli.
-        var contentIsHazirlikEmployeeAssoc = await uow.Repository<ContentEmployeeAssoc>()
-            .FindByNoTracking(c => c.ContentId == Constants.Constants.ContentHazirlikId 
+        if (component.Id == Constants.Constants.PortfoyEdinmeComponentId)
+        {
+            return "false"; 
+        }
+        
+        var portfoyEdinmeCompleted = await uow.Repository<ContentEmployeeAssoc>()
+            .FindByNoTracking(c => c.ContentId == Constants.Constants.PortfoyEdinmeContentId
                                    && c.EmployeeId == employeeId
                                    && c.IsCompleted)
             .AnyAsync();
 
-        return contentIsHazirlikEmployeeAssoc ? "false" : "true";
+        return portfoyEdinmeCompleted ? "false" : "true";
     }
     
     private async Task<string> GetCheckmarkAttributeValue(GenericUoW uow, Data.Entities.Component component, int employeeId, int? propertyId)

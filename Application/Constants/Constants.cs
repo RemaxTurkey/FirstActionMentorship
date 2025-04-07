@@ -12,6 +12,8 @@ namespace Application.Constants
         public static int ImageSliderAttributeId = 6;
         public static int ButtonGroupComponentTypeId = 9;
         public static int HazirlikComponentId = 26;
+        public static int PortfoyEdinmeComponentId = 27;
+        public static int PortfoyEdinmeContentId = 25;
 
         public static int PazarlamaContentId = 27;
 

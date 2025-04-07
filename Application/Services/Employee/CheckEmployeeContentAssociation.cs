@@ -115,20 +115,12 @@ public class
             {
                 var siblingContentCount = siblingCheck.Contents.Count;
                 var siblingContentCompletedCount = 0;
-                var allSibllingContents = await uow.Repository<ContentEmployeeRecord>()
-                    .FindByNoTracking(x =>
-                        siblingCheck.Contents.Select(x => x.Id).Contains(x.ContentId) &&
-                        x.EmployeeId == req.EmployeeId)
-                    .ToListAsync();
-
-
-                for (int i = 0; i < siblingCheck.Contents.Count; i++)
+                foreach (var sibling in siblingCheck.Contents)
                 {
-                    Data.Entities.Content sibling = siblingCheck.Contents[i];
                     var siblingContentCompleted = await uow.Repository<ContentEmployeeRecord>()
                         .FindByNoTracking(x =>
-                            siblingCheck.Contents.Select(x => x.Id).Contains(x.ContentId)
-                            && x.EmployeeId == req.EmployeeId)
+                            x.ContentId == sibling.Id &&
+                            x.EmployeeId == req.EmployeeId)
                         .AnyAsync();
 
                     if (siblingContentCompleted)

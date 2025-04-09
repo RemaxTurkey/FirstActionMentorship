@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Controllers.Base;
 using API.Extensions;
+using Application.Notifications;
 using Application.Services.Common;
 using Application.Services.Mail;
 using Application.Services.Neighbor;
+using Application.Services.Notification;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -51,9 +53,16 @@ namespace API.Controllers
         }
 
         [HttpPost("SendAcceptanceNotification")]
-        public async Task<IActionResult> SendAcceptanceNotification([FromBody] FAMAcceptanceNotification.Request request)
+        public async Task<IActionResult> SendAcceptanceNotification([FromBody] FAMAcceptanceBrokerEmailNotification.Request request)
         {
-            var response = await Svc<FAMAcceptanceNotification>().InvokeAsync(request);
+            var response = await Svc<FAMAcceptanceBrokerEmailNotification>().InvokeAsync(request);
+            return Ok(response);
+        }
+
+        [HttpGet("test")]
+        public async Task<IActionResult> TestNotification()
+        {
+            var response = await Svc<FAMAcceptanceGDSMSNotification>().InvokeNoTrackingAsync();
             return Ok(response);
         }
     }

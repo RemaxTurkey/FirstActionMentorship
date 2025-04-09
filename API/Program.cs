@@ -8,6 +8,7 @@ using Application.RedisCache;
 using Application.Services.Mail;
 using Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using RemaxSiteService.Notification;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ builder.Services.AddControllers(options => { options.Filters.Add<ApiResponseAttr
 builder.Services.Configure<MailSettingsOptions>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddNotificationServices(builder.Configuration);
 
 builder.Logging.ConfigureLogging()
     .ConfigureEntityFrameworkLogging(false, LogLevel.Debug);
@@ -30,7 +32,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
 // BackgroundService kaydı
-builder.Services.AddHostedService<DailyTaskService>();
+builder.Services.AddHostedService<FAMAcceptanceBrokerEmailNotificationJob>();
 
 builder.Services.RegisterInjectableServices();
 builder.Services.AddCommonService();

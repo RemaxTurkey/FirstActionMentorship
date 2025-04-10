@@ -1,20 +1,14 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Services.Mail;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
-    public class DailyTaskService : BackgroundService
+    public class FAMAcceptanceBrokerEmailNotificationJob : BackgroundService
     {
-        private readonly ILogger<DailyTaskService> _logger;
+        private readonly ILogger<FAMAcceptanceBrokerEmailNotificationJob> _logger;
         private readonly IServiceProvider _serviceProvider;
         private Timer? _timer;
 
-        public DailyTaskService(ILogger<DailyTaskService> logger, IServiceProvider serviceProvider)
+        public FAMAcceptanceBrokerEmailNotificationJob(ILogger<FAMAcceptanceBrokerEmailNotificationJob> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -74,8 +68,8 @@ namespace API.Services
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var famAcceptanceNotification = scope.ServiceProvider.GetRequiredService<FAMAcceptanceNotification>();
-                await famAcceptanceNotification.InvokeAsync(new FAMAcceptanceNotification.Request());
+                var famAcceptanceNotification = scope.ServiceProvider.GetRequiredService<FAMAcceptanceBrokerEmailNotification>();
+                await famAcceptanceNotification.InvokeAsync(new FAMAcceptanceBrokerEmailNotification.Request());
                 
                 _logger.LogInformation("FAMAcceptanceNotification servisi başarıyla tamamlandı");
             }

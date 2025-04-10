@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Mail
 {
-    public class FAMAcceptanceNotification : BaseSvc<FAMAcceptanceNotification.Request, FAMAcceptanceNotification.Response>
+    public class FAMAcceptanceBrokerEmailNotification : BaseSvc<FAMAcceptanceBrokerEmailNotification.Request, FAMAcceptanceBrokerEmailNotification.Response>
     {
         // X saatinde her gün çalışacak. 
         // Her çalıştığında EmployeeAcceptance tablosunda IsBrokerNotified false olan kayıtları bulacak.
         // Burada her kayıt için ofis brokerları bulunacak.
         // Her borker için birden fazla employee bilgilendirmesi yapılacaksa isimler ',' ile birleştirilecek.
         private readonly IEmailService _emailService;
-        public FAMAcceptanceNotification(IServiceProvider serviceProvider, IEmailService emailService) : base(serviceProvider)
+        public FAMAcceptanceBrokerEmailNotification(IServiceProvider serviceProvider, IEmailService emailService) : base(serviceProvider)
         {
             _emailService = emailService;
         }

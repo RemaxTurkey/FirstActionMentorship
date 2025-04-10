@@ -33,6 +33,7 @@ builder.Services.AddSingleton<ICacheManager, CacheManager>();
 
 // BackgroundService kaydı
 builder.Services.AddHostedService<FAMAcceptanceBrokerEmailNotificationJob>();
+builder.Services.AddHostedService<FAMAcceptanceGDSMSNotificationJob>();
 
 builder.Services.RegisterInjectableServices();
 builder.Services.AddCommonService();

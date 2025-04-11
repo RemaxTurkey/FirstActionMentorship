@@ -9,7 +9,6 @@ using Application.Services.ComponentTypeAttribute.DTOs;
 using Application.Services.Employee;
 using Application.UnitOfWorks;
 using Data.Entities;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

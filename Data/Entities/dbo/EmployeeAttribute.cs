@@ -15,7 +15,7 @@ namespace Data.Entities.dbo
         public bool Active { get; set; }    
     }
 
-    public enum EmployeeAttributeType : byte
+    public enum EmployeeAttributeType : Int16
     {
         PrevOccupation = 1,
         Educational = 2

@@ -9,5 +9,12 @@ namespace Application.Common
     {
         public string PhotoUploadPath { get; set; }
         public string PhotoUploadUrl { get; set; }
+        public string Token { get; set; }
+    }
+
+    public class RemaxySettings
+    {
+        public string ApiUrl { get; set; }
+        public string Token { get; set; }
     }
 }

@@ -65,6 +65,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<EmployeeAttribute>()
             .ToTable("EmployeeAttribute", "dbo")
             .Ignore(e => e.IsActive);
+        
+        modelBuilder.Entity<Neighborhood>()
+            .ToTable("Neighborhood", "dbo")
+            .Ignore(e => e.IsActive);
+
+        modelBuilder.Entity<EmployeeProfession>()
+            .ToTable("EmployeeProfession", "dbo")
+            .Ignore(e => e.IsActive);
+
+        modelBuilder.Entity<EmployeeSpecialtyArea>()
+            .ToTable("EmployeeSpecialtyArea", "dbo")
+            .Ignore(e => e.IsActive);
+
+        modelBuilder.Entity<Profession>()
+            .ToTable("Profession", "dbo")
+            .Ignore(e => e.IsActive);
 
         base.OnModelCreating(modelBuilder);
     }

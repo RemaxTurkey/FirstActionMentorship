@@ -9,6 +9,7 @@ using Application.Services.Common;
 using Application.Services.Mail;
 using Application.Services.Neighbor;
 using Application.Services.Notification;
+using Application.Services.Rest;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -59,10 +60,10 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("test")]
-        public async Task<IActionResult> TestNotification()
+        [HttpGet("GenerateEmployeeIntroduction")]
+        public async Task<IActionResult> GenerateEmployeeIntroduction([FromQuery] int employeeId)
         {
-            var response = await Svc<FAMAcceptanceGDSMSNotification>().InvokeNoTrackingAsync();
+            var response = await Svc<EmployeeIntroductionAIRequest>().InvokeNoTrackingAsync(new EmployeeIntroductionAIRequest.Request(employeeId));
             return Ok(response);
         }
     }

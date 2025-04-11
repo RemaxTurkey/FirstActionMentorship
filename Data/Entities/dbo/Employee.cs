@@ -3,6 +3,8 @@
 public class Employee : Entity
 {
     public int Id { get; set; }
+    public byte? ChildrenCount { get; set; }
+    public byte? MaritalStatus { get; set; }
     public int? MasterEmployeeId { get; set; }
     public bool? EmployeeHasOwnCompany { get; set; }
     public string EmployeeNo { get; set; }
@@ -111,4 +113,33 @@ public class Employee : Entity
     public int? ReferenceEmployeeId { get; set; }
     
     public override bool IsActive => true;
+}
+
+public class EmployeeWorkingDays
+{
+    public int EmployeeId { get; set; }
+    public int WorkingDays { get; set; }
+}
+
+public class EmployeeSpecialtyArea : Entity
+{
+    public int EmployeeId { get; set; }
+    public int NeighborhoodId { get; set; }
+}
+
+public class Neighborhood : Entity
+{
+    public string NeighborhoodName { get; set; }
+}
+
+
+public class EmployeeProfession : Entity
+{
+    public int EmployeeId { get; set; }
+    public int ProfessionId { get; set; }
+}
+
+public class Profession : Entity
+{
+    public string ProfessionName { get; set; }
 }

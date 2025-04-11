@@ -60,8 +60,8 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("GenerateEmployeeIntroduction")]
-        public async Task<IActionResult> GenerateEmployeeIntroduction([FromQuery] int employeeId)
+        [HttpGet("{employeeId}/GenerateEmployeeIntroduction")]
+        public async Task<IActionResult> GenerateEmployeeIntroduction([FromRoute] int employeeId)
         {
             var response = await Svc<EmployeeIntroductionAIRequest>().InvokeNoTrackingAsync(new EmployeeIntroductionAIRequest.Request(employeeId));
             return Ok(response);

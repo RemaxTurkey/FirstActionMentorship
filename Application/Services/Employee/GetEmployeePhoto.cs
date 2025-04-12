@@ -20,7 +20,7 @@ namespace Application.Services.Employee
 
         public record Response
         {
-            public string Photo { get; set; }
+            public string PhotoUrl { get; set; }
         }
 
         public GetEmployeePhoto(IServiceProvider serviceProvider, IOptions<AppSettings> appSettings) : base(serviceProvider)
@@ -36,7 +36,7 @@ namespace Application.Services.Employee
             {
                 return new Response
                 {
-                    Photo = string.Empty
+                    PhotoUrl = string.Empty
                 };
             }
 
@@ -49,7 +49,7 @@ namespace Application.Services.Employee
 
             return new Response
             {
-                Photo = photoUrl ?? string.Empty
+                PhotoUrl = photoUrl ?? string.Empty
             };
         }
 

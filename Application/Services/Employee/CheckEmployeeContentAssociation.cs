@@ -59,7 +59,7 @@ public class
                 EmployeeId = req.EmployeeId
             });
 
-            if (string.IsNullOrEmpty(profilePhoto.Photo))
+            if (string.IsNullOrEmpty(profilePhoto.PhotoUrl))
             {
                 return new Response(false);
             }
@@ -160,7 +160,7 @@ public class
                             EmployeeId = req.EmployeeId
                         });
 
-                    if (!string.IsNullOrEmpty(profilePhoto.Photo))
+                    if (!string.IsNullOrEmpty(profilePhoto.PhotoUrl))
                     {
                         exists = true;
                     }

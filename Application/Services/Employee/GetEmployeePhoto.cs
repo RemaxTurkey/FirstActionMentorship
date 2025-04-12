@@ -44,7 +44,7 @@ namespace Application.Services.Employee
             
             if (!string.IsNullOrEmpty(photoUrl) && !photoUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                photoUrl = GenerateEmployeePhotoUrl(_appSettings.Value.PhotoUploadUrl, photoUrl);
+                photoUrl = GenerateEmployeePhotoUrl(_appSettings.Value.PhotoUploadUrl + "employee", photoUrl);
             }
 
             return new Response

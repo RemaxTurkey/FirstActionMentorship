@@ -20,6 +20,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers(options => { options.Filters.Add<ApiResponseAttribute>(); });
 builder.Services.Configure<MailSettingsOptions>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<RemaxySettings>(builder.Configuration.GetSection("Remaxy"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddNotificationServices(builder.Configuration);
 

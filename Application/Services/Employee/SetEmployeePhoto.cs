@@ -76,6 +76,9 @@ public class SetEmployeePhoto : BaseSvc<SetEmployeePhoto.Request, SetEmployeePho
         }
 
         var sql = "UPDATE [dbo].[Employee] SET [Photo] = @p0 WHERE Id = @p1";
+        var oldValue = await uow.Repository<Data.Entities.dbo.Employee>().GetByIdAsync(req.EmployeeId);
+        var employeeOfficesSql = "SELECT [OfficeId] FROM [dbo].[OfficeEmployee] WHERE [EmployeeId] = @p0";
+        var employeeOffices = await uow.DbContext.Database.SqlQueryRaw<EmployeeOfficeDto>(employeeOfficesSql, req.EmployeeId).ToListAsync();
         await uow.DbContext.Database.ExecuteSqlRawAsync(sql, employeePath, req.EmployeeId);
 
         await uow.SaveChangesAsync();
@@ -90,7 +93,10 @@ public class SetEmployeePhoto : BaseSvc<SetEmployeePhoto.Request, SetEmployeePho
             Ip = req.IpAddress,
             RelatedEmployeeId = req.EmployeeId,
             HistoryTypeId = EmployeeRecordHistoryType.PhotoChanged,
-            IsMobile = true
+            IsMobile = true,
+            OldValue = oldValue.Photo,
+            NewValue = employeePath,
+            OfficeId = employeeOffices.FirstOrDefault()?.OfficeId
         });
     
         await uow.SaveChangesAsync();
@@ -107,6 +113,11 @@ public class SetEmployeePhoto : BaseSvc<SetEmployeePhoto.Request, SetEmployeePho
     public record Request(int EmployeeId, IFormFile Image)
     {
         public string IpAddress { get; set; }
+    }
+
+    public class EmployeeOfficeDto
+    {
+        public int OfficeId { get; set; }
     }
 
     public record Response(int EmployeeId);

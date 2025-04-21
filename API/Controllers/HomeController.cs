@@ -66,5 +66,12 @@ namespace API.Controllers
             var response = await Svc<EmployeeIntroductionAIRequest>().InvokeNoTrackingAsync(new EmployeeIntroductionAIRequest.Request(employeeId));
             return Ok(response);
         }
+
+        [HttpGet("GetStaticIntroductionText")]
+        public async Task<IActionResult> GetStaticIntroductionText()
+        {
+            var response = await Svc<GetStaticIntroductionText>().InvokeNoTrackingAsync(new GetStaticIntroductionText.Request());
+            return Ok(response);
+        }
     }
 }

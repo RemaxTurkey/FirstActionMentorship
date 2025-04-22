@@ -73,5 +73,12 @@ namespace API.Controllers
             var response = await Svc<GetStaticIntroductionText>().InvokeNoTrackingAsync(new GetStaticIntroductionText.Request());
             return Ok(response);
         }
+        
+        [HttpGet("test")]
+        public async Task<IActionResult> Test()
+        {
+            var response = await Svc<FAMAcceptanceGDSMSNotification>().InvokeNoTrackingAsync(new FAMAcceptanceGDSMSNotification.Request());
+            return Ok(response);
+        }
     }
 }

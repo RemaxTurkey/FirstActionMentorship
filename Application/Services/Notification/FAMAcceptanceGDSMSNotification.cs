@@ -43,7 +43,7 @@ namespace Application.Services.Notification
             .FindByNoTracking(x => employeeIds.Contains(x.Id))
             .ToListAsync();
 
-            var smsText = $@"Değerli #Ad Soyad#,
+            var smsTemplate = $@"Değerli #Ad Soyad#,
 Mobil uygulamamıza giriş yaparak sizin için hazırladığımız ücretsiz İlk İşlem Mentörlüğü programı ile gayrimenkul yolculuğunuza adım atabilirsiniz!
 Mobil Uygulamayı indirmek için: https://www.remax.com.tr/myremaxapp.html
 Sizi aramızda görmek için sabırsızlanıyoruz!
@@ -57,7 +57,7 @@ RE/MAX Türkiye";
                     continue;
                 }
 
-                smsText = smsText.Replace("#Ad Soyad#", employee.NameSurname);
+                var smsText = smsTemplate.Replace("#Ad Soyad#", employee.NameSurname);
 
                 await _notificationFactory.SendNotification(new SmsNotificationRequest(){
                     Message = smsText,

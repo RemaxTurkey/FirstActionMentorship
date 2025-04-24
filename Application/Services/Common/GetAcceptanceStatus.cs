@@ -25,7 +25,7 @@ namespace Application.Services.Common
         protected override async Task<Response> _InvokeAsync(GenericUoW uow, Request req)
         {
             var employeeAcceptance = await uow.Repository<EmployeeAcceptance>()
-            .FindByNoTracking(x => x.EmployeeId == req.EmployeeId)
+            .FindByNoTracking(x => x.EmployeeId == req.EmployeeId && x.IsActive)
             .FirstOrDefaultAsync();
 
             return new Response(
